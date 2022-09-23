@@ -55,6 +55,8 @@ const implementation = require("./routes/implementation");
 const importer = require("./routes/importer");
 const workflowUtils = require("./util/workflow");
 
+const tbc = require("./routes/tbc")
+
 const app = express();
 app.enable('strict routing');
 
@@ -80,6 +82,8 @@ router.use(fileUpload({createParentPath:true}));
 router.use("/implementation", implementation);
 router.use("/importer", importer);
 router.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+router.use("/tbc", tbc)
 
 app.use("/phenoflow", router);
 
