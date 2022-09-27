@@ -120,8 +120,8 @@ const WorkflowUtils = require('../util/workflow');
     }
     // Create the needed steps (with their inputs, outputs and implememtations) and add them to the previous workflow.
     // Step 1: read data from a .csv file (load type).
-    var step_name = "read_initial_dataset"
-    var step_description = "Read the initial dataset from a .csv file."
+    var step_name = "step_1_read_initial_dataset"
+    var step_description = "Read the initial dataset from the .csv file."
     var step_type = "load"
     try {
         var step = await models.step.create({name:step_name, doc:step_description, type:step_type, workflowId:workflow_id, position:1});
@@ -131,7 +131,7 @@ const WorkflowUtils = require('../util/workflow');
         logger.debug(error);
         return res.status(500).send(error);
     }
-    // Step N: write data to a csv file (output type).
+    // Step N: write final data to a csv file (output type).
 
 
     //await WorkflowUtils.workflowComplete(workflow_id);
