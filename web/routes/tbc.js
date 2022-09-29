@@ -159,9 +159,9 @@ const WorkflowUtils = require('../util/workflow');
         logger.debug(error);
         return res.status(500).send(error);
     }
-    // Step 2: apply the corresponding clustering algorithm k times over the dataset in order to obtain all partitions.
+    // Step 2: apply the corresponding clustering algorithm (k-1 times) over the dataset in order to obtain all partitions.
     var step_name = "step_2_from_dataset_to_partitions"
-    var step_description = "Read the csv dataset and apply the corresponding clustering algorithm k times in order to obtain all partitions."
+    var step_description = "Read the csv dataset and apply the corresponding clustering algorithm (k-1 times) in order to obtain all partitions."
     var step_type = "logic"
     try {
         var step = await models.step.create({name:step_name, doc:step_description, type:step_type, workflowId:workflow_id, position:2});
