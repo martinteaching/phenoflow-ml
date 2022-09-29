@@ -18,7 +18,7 @@ const WorkflowUtils = require('../util/workflow');
  *     security:
  *       - bearerAuth: []
  *     summary: Create a new Trace-based clustering phenotype.
- *     description: Create a phenotype definition based on the Trace-based clustering technique.
+ *     description: Create a phenotype definition based on the Trace-based clustering technique (PAPER: "A methodology based on Trace-based clustering for patient phenotyping" , DOI: https://doi.org/10.1016/j.knosys.2021.107469 , GITHUB REPO: https://github.com/antoniolopezmc/A-methodology-based-on-Trace-based-clustering-for-patient-phenotyping).
  *     requestBody:
  *       required: true
  *       content:
@@ -42,6 +42,9 @@ const WorkflowUtils = require('../util/workflow');
  *                 type: number
  *                 description: seed for the generation of random numbers
  *                 minimum: 0
+ *               threshold:
+ *                 type: number
+ *                 description: minimum threshold value used to filter and obtain the final candidate clusters
  *               replace:
  *                 type: boolean
  *                 description: if replace is true and the phenotype name already exists, the phenotype will be completely replaced; if replace is false and the phenotype name already exists, an HTTP 500 response code will be returned
@@ -63,7 +66,7 @@ const WorkflowUtils = require('../util/workflow');
  */
  router.post('/addPhenotype', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algorithms:['RS256']}), async function(req, res, next) {
     req.setTimeout(0);
-    if ( !req.body.k || !req.body.clustering_algorithm || !req.body.match_function || !req.body.random_seed || !req.body.replace || !req.body.name || !req.body.about || !req.body.userName ) {
+    if ( !req.body.k || !req.body.clustering_algorithm || !req.body.match_function || !req.body.random_seed || !req.body.threshold || !req.body.replace || !req.body.name || !req.body.about || !req.body.userName ) {
         return res.status(500).send("Missing parameters (see documentation).")
     }
     var req_body_k = Number.parseInt(req.body.k)
@@ -81,6 +84,10 @@ const WorkflowUtils = require('../util/workflow');
     var req_body_random_seed = Number.parseFloat(req.body.random_seed)
     if ( Number.isNaN(req_body_random_seed) || (req_body_random_seed < 0) ) {
         return res.status(500).send("Error: random_seed parameter must be greater or equal than 0.")
+    }
+    var req_body_threshold = Number.parseFloat(req.body.threshold)
+    if ( Number.isNaN(req_body_threshold) ) {
+        return res.status(500).send("Error: threshold parameter is not valid (see documentation).")
     }
     if ( (req.body.replace.toLowerCase() !== "true") && (req.body.replace.toLowerCase() !== "false") ) {
         return res.status(500).send("Error: replace parameter is not valid (see documentation).")
@@ -119,9 +126,9 @@ const WorkflowUtils = require('../util/workflow');
         return res.status(500).send(error);
     }
     // Create the needed steps (with their inputs, outputs and implememtations) and add them to the previous workflow.
-    // Step 1: read data from a .csv file (load type).
-    var step_name = "step_1_read_initial_dataset"
-    var step_description = "Read the initial dataset from the .csv file."
+    // Step 1: LOAD STEP: we suppose that the initial dataset (a .csv file) is already preprocessed and without missing values.
+    var step_name = "step_1_load"
+    var step_description = "Read the initial dataset from the .csv file. We suppose that this dataset is already preprocessed and without missing values. Remember that all attributes must be numeric, since a clustering technique will be applied."
     var step_type = "load"
     try {
         var step = await models.step.create({name:step_name, doc:step_description, type:step_type, workflowId:workflow_id, position:1});
@@ -131,8 +138,51 @@ const WorkflowUtils = require('../util/workflow');
         logger.debug(error);
         return res.status(500).send(error);
     }
-    // Step N: write final data to a csv file (output type).
+    try {
+        await models.input.create({doc:"A .csv file containing a dataset in csv format. We suppose that this dataset is already preprocessed and without missing values. Remember that all attributes must be numeric, since a clustering technique will be applied.", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the input for step 1: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await models.output.create({doc:"The same .csv file, since the dataset is already preprocessed and in csv format.", extension:"csv", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the output for step 1: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await models.implementation.create({fileName:"templates/tbc/step1.py", language:"python", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the implementation for step 1: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Step 2: apply the corresponding clustering algorithm k times over the dataset in order to obtain all partitions.
+    var step_name = "step_2_from_dataset_to_partitions"
+    var step_description = "Read the csv dataset and apply the corresponding clustering algorithm k times in order to obtain all partitions."
+    var step_type = "logic"
+    try {
+        var step = await models.step.create({name:step_name, doc:step_description, type:step_type, workflowId:workflow_id, position:2});
+        var step_id = step.id
+    } catch(error) {
+        error = "Error creating step 2: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
 
+
+
+
+
+
+
+    // Step 3: obtain the matrix of matches using all partitions generated previously.
+
+    // Step 4: filter the matrix of matches in order to obtain the final candidate clusters.
+
+    // Step 5: OUTPUT STEP: write final data to a .csv file.
 
     //await WorkflowUtils.workflowComplete(workflow_id);
     return res.sendStatus(200);
