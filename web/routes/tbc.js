@@ -10,6 +10,7 @@ const sanitizeHtml = require('sanitize-html');
 
 const config = require("config");
 const WorkflowUtils = require('../util/workflow');
+const path = require('path');
 
 /**
  * @swagger
@@ -18,7 +19,7 @@ const WorkflowUtils = require('../util/workflow');
  *     security:
  *       - bearerAuth: []
  *     summary: Create a new Trace-based clustering phenotype.
- *     description: Create a phenotype definition based on the Trace-based clustering technique (PAPER: "A methodology based on Trace-based clustering for patient phenotyping" , DOI: https://doi.org/10.1016/j.knosys.2021.107469 , GITHUB REPO: https://github.com/antoniolopezmc/A-methodology-based-on-Trace-based-clustering-for-patient-phenotyping).
+ *     description: Create a phenotype definition based on the Trace-based clustering technique ( PAPER NAME -> A methodology based on Trace based clustering for patient phenotyping , DOI -> doi.org/10.1016/j.knosys.2021.107469 , GITHUB REPO -> github.com/antoniolopezmc/A-methodology-based-on-Trace-based-clustering-for-patient-phenotyping ).
  *     requestBody:
  *       required: true
  *       content:
@@ -125,6 +126,13 @@ const WorkflowUtils = require('../util/workflow');
         logger.debug(error);
         return res.status(500).send(error);
     }
+    // Create the needed folders to store the implementation files.
+    implementation_files_folder_path = "uploads/" + workflow_id + "/python"
+    try {
+        await fs.stat(implementation_files_folder_path);
+    } catch(error) {
+        await fs.mkdir(implementation_files_folder_path, {recursive:true});
+    }
     // Create the needed steps (with their inputs, outputs and implememtations) and add them to the previous workflow.
     // Step 1: LOAD STEP: we suppose that the initial dataset (a .csv file) is already preprocessed and without missing values.
     var step_name = "step_1_load"
@@ -152,8 +160,18 @@ const WorkflowUtils = require('../util/workflow');
         logger.debug(error);
         return res.status(500).send(error);
     }
+    source_implementation_file_path = "templates/tbc/step1.py"
+    dest_implementation_file_path = implementation_files_folder_path + "/step1.py"
+    try{
+        // Flag 0 -> dest is overwritten if it already exists.
+        await fs.copyFile(source_implementation_file_path, dest_implementation_file_path, 0);
+    } catch(error) {
+        error = "Error creating the implementation file for the step 1: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
     try {
-        await models.implementation.create({fileName:"templates/tbc/step1.py", language:"python", stepId:step_id});
+        await models.implementation.create({fileName:dest_implementation_file_path, language:"python", stepId:step_id});
     } catch(error) {
         error = "Error creating the implementation for step 1: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
         logger.debug(error);
@@ -171,12 +189,54 @@ const WorkflowUtils = require('../util/workflow');
         logger.debug(error);
         return res.status(500).send(error);
     }
-
-
-
-
-
-
+    try {
+        await models.input.create({doc:"The csv dataset over which the corresponding clustering algorithm will be applied (k-1 times) in order to obtain all partitions.", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the input for step 2: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await models.output.create({doc:"A json file containing all partitions generated (each cluster of each partition stores a list with the indices of the instances belonging to that cluster).", extension:"json", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the output for step 2: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    source_implementation_file_path = "templates/tbc/step2.py"
+    dest_implementation_file_path = implementation_files_folder_path + "/step2.py"
+    try{
+        source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
+        // We have to do replacements depending on the value of the 'clustering_algorithm' parameter.
+        if (req.body.clustering_algorithm === "kmeans") {
+            regex = /<CLUSTERING_ALGORITHM_NAME>|<RANDOM_SEED_PARAMETER>|<K_PARAMETER>|<CLUSTERING_ALGORITHM_CALL>/g
+            new_source_file_content = source_file_content.replaceAll(regex, (match) => {
+                if (match === "<CLUSTERING_ALGORITHM_NAME>") {
+                    return "KMeans"
+                } else if (match === "<RANDOM_SEED_PARAMETER>") {
+                    return req_body_random_seed.toString()
+                } else if (match === "<K_PARAMETER>") {
+                    return req_body_k.toString()
+                } else if (match === "<CLUSTERING_ALGORITHM_CALL>") {
+                    return "KMeans(n_clusters=number_of_clusters, random_state=current_random_seed).fit(pandas_dataframe)"
+                } else {
+                    return match;
+                }
+            });
+        }
+        await fs.writeFile(dest_implementation_file_path, new_source_file_content, "utf8");
+    } catch(error) {
+        error = "Error creating the implementation file for the step 2: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await models.implementation.create({fileName:dest_implementation_file_path, language:"python", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the implementation for step 2: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
 
     // Step 3: obtain the matrix of matches using all partitions generated previously.
 

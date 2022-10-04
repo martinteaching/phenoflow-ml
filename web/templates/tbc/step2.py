@@ -8,14 +8,14 @@
 import sys
 from pandas import read_csv
 # We force that all clustering algorithms are from 'sklearn.cluster' to maintain the same interface.
-from sklearn.cluster import [[CLUSTERING_ALGORITHM_NAME]]
+from sklearn.cluster import <CLUSTERING_ALGORITHM_NAME>
 import json
 
 # IMPORTANT: it is not necessary to use 'open' with the file_input, since it will be read by pandas.
 with open('partitions.json', 'w') as file_out:
     # Initial parameters.
-    random_seed = [[RANDOM_SEED_PARAMETER]]
-    k = [[K_PARAMETER]]
+    random_seed = <RANDOM_SEED_PARAMETER>
+    k = <K_PARAMETER>
     # Read the input dataset.
     pandas_dataframe = read_csv(sys.argv[1])
     # Dictionary in which the final results will be stored.
@@ -25,7 +25,7 @@ with open('partitions.json', 'w') as file_out:
     # Generate all partitions (from 'number_of_cluster=2' to 'number_of_cluster=k').
     for number_of_clusters in range(2, k+1):
         # Run the clustering algorithm.
-        algorithm_result = [[CLUSTERING_ALGORITHM_CALL]]
+        algorithm_result = <CLUSTERING_ALGORITHM_CALL>
         # For the current partition, generate all its clusters (from 0 to 'number_of_clusters - 1').
         dictionary_of_clusters = dict()
         for cluster in range(0,number_of_clusters):
@@ -38,4 +38,4 @@ with open('partitions.json', 'w') as file_out:
         # Add the current partition to the dictionary.
         dictionary_of_partitions["partition_k_"+str(number_of_clusters)] = dictionary_of_clusters
     # Finally, we convert all to json format and write to the output file.
-    json.dump(dictionary_of_partitions, file_out)
+    json.dump(dictionary_of_partitions, file_out, indent=4)
