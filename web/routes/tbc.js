@@ -126,12 +126,18 @@ const path = require('path');
         logger.debug(error);
         return res.status(500).send(error);
     }
-    // Create the needed folders to store the implementation files.
+    // Create the initial needed folders to store the implementation files.
     implementation_files_folder_path = "uploads/" + workflow_id + "/python"
     try {
         await fs.stat(implementation_files_folder_path);
     } catch(error) {
-        await fs.mkdir(implementation_files_folder_path, {recursive:true});
+        try {
+            await fs.mkdir(implementation_files_folder_path, {recursive:true});
+        } catch(error) {
+            error = "Error creating the initial needed folders to store the implementation files: " + error;
+            logger.debug(error);
+            return res.status(500).send(error);
+        }
     }
     // Create the needed steps (with their inputs, outputs and implememtations) and add them to the previous workflow.
     // Step 1: LOAD STEP: we suppose that the initial dataset (a .csv file) is already preprocessed and without missing values.
@@ -208,8 +214,8 @@ const path = require('path');
     try{
         source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
         // We have to do replacements depending on the value of the 'clustering_algorithm' parameter.
+        regex = /<CLUSTERING_ALGORITHM_NAME>|<RANDOM_SEED_PARAMETER>|<K_PARAMETER>|<CLUSTERING_ALGORITHM_CALL>/g
         if (req.body.clustering_algorithm === "kmeans") {
-            regex = /<CLUSTERING_ALGORITHM_NAME>|<RANDOM_SEED_PARAMETER>|<K_PARAMETER>|<CLUSTERING_ALGORITHM_CALL>/g
             new_source_file_content = source_file_content.replaceAll(regex, (match) => {
                 if (match === "<CLUSTERING_ALGORITHM_NAME>") {
                     return "KMeans"
@@ -237,9 +243,83 @@ const path = require('path');
         logger.debug(error);
         return res.status(500).send(error);
     }
-
     // Step 3: obtain the matrix of matches using all partitions generated previously.
-
+    var step_name = "step_3_from_partitions_to_matrix_of_matches"
+    var step_description = "Read the json file containing the partitions and generate the matrix of matches in json format."
+    var step_type = "logic"
+    try {
+        var step = await models.step.create({name:step_name, doc:step_description, type:step_type, workflowId:workflow_id, position:3});
+        var step_id = step.id
+    } catch(error) {
+        error = "Error creating step 3: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await models.input.create({doc:"A json file containing all partitions generated in the previous step (each cluster of each partition stores a list with the indices of the instances belonging to that cluster).", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the input for step 3: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await models.output.create({doc:"A json file containing the matrix of matches.", extension:"json", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the output for step 3: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    source_implementation_file_path = "templates/tbc/step3.py"
+    dest_implementation_file_path = implementation_files_folder_path + "/step3.py"
+    try{
+        source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
+        // We have to do replacements depending on the value of the 'match_function' parameter.
+        regex = /<K_PARAMETER>|<VALUE_OF_MATCH_CALCULATION>/g
+        if (req.body.match_function === "jaccard") {
+            new_source_file_content = source_file_content.replaceAll(regex, (match) => {
+                if (match === "<K_PARAMETER>") {
+                    return req_body_k.toString()
+                } else if (match === "<VALUE_OF_MATCH_CALCULATION>") {
+                    return "len( cluster_of_partition_k.intersection(cluster_of_current_partition) ) / len( cluster_of_partition_k.union(cluster_of_current_partition) )"
+                } else {
+                    return match;
+                }
+            });
+        } else if (req.body.match_function === "jaccard2") {
+            new_source_file_content = source_file_content.replaceAll(regex, (match) => {
+                if (match === "<K_PARAMETER>") {
+                    return req_body_k.toString()
+                } else if (match === "<VALUE_OF_MATCH_CALCULATION>") {
+                    return "len( cluster_of_partition_k.intersection(cluster_of_current_partition) ) / len( cluster_of_current_partition )"
+                } else {
+                    return match;
+                }
+            });
+        } else if (req.body.match_function === "dice") {
+            new_source_file_content = source_file_content.replaceAll(regex, (match) => {
+                if (match === "<K_PARAMETER>") {
+                    return req_body_k.toString()
+                } else if (match === "<VALUE_OF_MATCH_CALCULATION>") {
+                    return "(2*len(cluster_of_partition_k.intersection(cluster_of_current_partition))) / (len(cluster_of_partition_k)+len(cluster_of_current_partition))"
+                } else {
+                    return match;
+                }
+            });
+        }
+        await fs.writeFile(dest_implementation_file_path, new_source_file_content, "utf8");
+    } catch(error) {
+        error = "Error creating the implementation file for the step 3: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await models.implementation.create({fileName:dest_implementation_file_path, language:"python", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the implementation for step 3: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    
     // Step 4: filter the matrix of matches in order to obtain the final candidate clusters.
 
     // Step 5: OUTPUT STEP: write final data to a .csv file.
