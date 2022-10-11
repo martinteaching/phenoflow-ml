@@ -169,8 +169,19 @@ const path = require('path');
     source_implementation_file_path = "templates/tbc/step1.py"
     dest_implementation_file_path = implementation_files_folder_path + "/step1.py"
     try{
-        // Flag 0 -> dest is overwritten if it already exists.
-        await fs.copyFile(source_implementation_file_path, dest_implementation_file_path, 0);
+        source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
+        // We have to replace using the value of the 'name' parameter and of the workflow ID.
+        regex = /<WORKFLOW_NAME>|<WORKFLOW_ID>/g
+        new_source_file_content = source_file_content.replaceAll(regex, (match) => {
+            if (match === "<WORKFLOW_NAME>") {
+                return req.body.name;
+            } else if (match === "<WORKFLOW_ID>") {
+                return workflow_id.toString()
+            } else {
+                return match;
+            }
+        });
+        await fs.writeFile(dest_implementation_file_path, new_source_file_content, "utf8");   
     } catch(error) {
         error = "Error creating the implementation file for the step 1: " + error;
         logger.debug(error);
@@ -213,7 +224,7 @@ const path = require('path');
     dest_implementation_file_path = implementation_files_folder_path + "/step2.py"
     try{
         source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
-        // We have to do replacements depending on the value of the 'clustering_algorithm' parameter.
+        // We have to replace depending on the value of the 'clustering_algorithm' parameter.
         regex = /<CLUSTERING_ALGORITHM_NAME>|<RANDOM_SEED_PARAMETER>|<K_PARAMETER>|<CLUSTERING_ALGORITHM_CALL>/g
         if (req.body.clustering_algorithm === "kmeans") {
             new_source_file_content = source_file_content.replaceAll(regex, (match) => {
@@ -273,7 +284,7 @@ const path = require('path');
     dest_implementation_file_path = implementation_files_folder_path + "/step3.py"
     try{
         source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
-        // We have to do replacements depending on the value of the 'match_function' parameter.
+        // We have to replace depending on the value of the 'match_function' parameter.
         regex = /<K_PARAMETER>|<VALUE_OF_MATCH_CALCULATION>/g
         if (req.body.match_function === "jaccard") {
             new_source_file_content = source_file_content.replaceAll(regex, (match) => {
@@ -319,8 +330,51 @@ const path = require('path');
         logger.debug(error);
         return res.status(500).send(error);
     }
-    
     // Step 4: filter the matrix of matches in order to obtain the final candidate clusters.
+    var step_name = "step_4_from_matrix_of_matches_to_final_candidate_clusters"
+    var step_description = "Read the json file containing the matrix of matches and filter it in order to obtain the final candidate clusters in json format."
+    var step_type = "logic"
+    try {
+        var step = await models.step.create({name:step_name, doc:step_description, type:step_type, workflowId:workflow_id, position:4});
+        var step_id = step.id
+    } catch(error) {
+        error = "Error creating step 4: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await models.input.create({doc:"A json file containing the matrix of matches generated in the previous step.", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the input for step 4: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await models.output.create({doc:"A json file containing the final candidate clusters.", extension:"json", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the output for step 4: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    source_implementation_file_path = "templates/tbc/step4.py"
+    dest_implementation_file_path = implementation_files_folder_path + "/step4.py"
+    try{
+        source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
+        // We have to replace using the value of the 'threshold' parameter.
+        new_source_file_content = source_file_content.replaceAll("<THRESHOLD_PARAMETER>", req_body_threshold.toString());
+        await fs.writeFile(dest_implementation_file_path, new_source_file_content, "utf8");
+    } catch(error) {
+        error = "Error creating the implementation file for the step 4: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await models.implementation.create({fileName:dest_implementation_file_path, language:"python", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the implementation for step 4: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
 
     // Step 5: OUTPUT STEP: write final data to a .csv file.
 

@@ -7,6 +7,6 @@
 
 import sys
 
-with open(sys.argv[1], 'r') as file_in, open('dataset.csv', 'w') as file_out:
+with open(sys.argv[1], 'r') as file_in, open('name_<WORKFLOW_NAME>_id_<WORKFLOW_ID>_dataset.csv', 'w') as file_out:
     file_content = file_in.read()
     file_out.write(file_content)
