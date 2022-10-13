@@ -376,8 +376,62 @@ const path = require('path');
         return res.status(500).send(error);
     }
 
-    // Step 5: OUTPUT STEP: write final data to a .csv file.
-
+    // Step 5: OUTPUT STEP: write the final candidate clusters to a .csv file.
+    var step_name = "step_5_output"
+    var step_description = "Read the json file containing the final candidate clusters and write them to a .csv file. This .csv file will contain the following three attributes: (1) instance index of the initial dataset (starting from 0), (2) cluster name (starting from 0 and from the partition with more clusters), and (3) mean value of match with previous partitions."
+    var step_type = "output"
+    try {
+        var step = await models.step.create({name:step_name, doc:step_description, type:step_type, workflowId:workflow_id, position:5});
+        var step_id = step.id
+    } catch(error) {
+        error = "Error creating step 5: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await models.input.create({doc:"A json file containing the final candidate clusters.", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the input for step 5: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await models.output.create({doc:"The output .csv file containing the final candidate clusters. This .csv file will contain the following three attributes: (1) instance index of the initial dataset (starting from 0), (2) cluster name (starting from 0 and from the partition with more clusters), and (3) mean value of match with previous partitions.", extension:"csv", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the output for step 5: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    source_implementation_file_path = "templates/tbc/step5.py"
+    dest_implementation_file_path = implementation_files_folder_path + "/step5.py"
+    try{
+        source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
+        // We have to replace using the value of the 'name' parameter and of the workflow ID, as well as the value of the k parameter.
+        regex = /<WORKFLOW_NAME>|<WORKFLOW_ID>|<K_PARAMETER>/g
+        new_source_file_content = source_file_content.replaceAll(regex, (match) => {
+            if (match === "<WORKFLOW_NAME>") {
+                return req.body.name;
+            } else if (match === "<WORKFLOW_ID>") {
+                return workflow_id.toString()
+            } else if (match === "<K_PARAMETER>") {
+                return req_body_k.toString()
+            } else {
+                return match;
+            }
+        });
+        await fs.writeFile(dest_implementation_file_path, new_source_file_content, "utf8");   
+    } catch(error) {
+        error = "Error creating the implementation file for the step 5: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await models.implementation.create({fileName:dest_implementation_file_path, language:"python", stepId:step_id});
+    } catch(error) {
+        error = "Error creating the implementation for step 5: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
     //await WorkflowUtils.workflowComplete(workflow_id);
     return res.sendStatus(200);
 });
