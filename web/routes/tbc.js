@@ -166,8 +166,9 @@ const path = require('path');
         logger.debug(error);
         return res.status(500).send(error);
     }
-    source_implementation_file_path = "templates/tbc/step1.py"
-    dest_implementation_file_path = implementation_files_folder_path + "/step1.py"
+    implementation_file_name = "step1.py"
+    source_implementation_file_path = "templates/tbc/" + implementation_file_name
+    dest_implementation_file_path = implementation_files_folder_path + "/" + implementation_file_name
     try{
         source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
         // We have to replace using the value of the 'name' parameter and of the workflow ID.
@@ -188,7 +189,7 @@ const path = require('path');
         return res.status(500).send(error);
     }
     try {
-        await models.implementation.create({fileName:dest_implementation_file_path, language:"python", stepId:step_id});
+        await models.implementation.create({fileName:implementation_file_name, language:"python", stepId:step_id});
     } catch(error) {
         error = "Error creating the implementation for step 1: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
         logger.debug(error);
@@ -220,8 +221,9 @@ const path = require('path');
         logger.debug(error);
         return res.status(500).send(error);
     }
-    source_implementation_file_path = "templates/tbc/step2.py"
-    dest_implementation_file_path = implementation_files_folder_path + "/step2.py"
+    implementation_file_name = "step2.py"
+    source_implementation_file_path = "templates/tbc/" + implementation_file_name
+    dest_implementation_file_path = implementation_files_folder_path + "/" + implementation_file_name
     try{
         source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
         // We have to replace depending on the value of the 'clustering_algorithm' parameter.
@@ -248,7 +250,7 @@ const path = require('path');
         return res.status(500).send(error);
     }
     try {
-        await models.implementation.create({fileName:dest_implementation_file_path, language:"python", stepId:step_id});
+        await models.implementation.create({fileName:implementation_file_name, language:"python", stepId:step_id});
     } catch(error) {
         error = "Error creating the implementation for step 2: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
         logger.debug(error);
@@ -280,8 +282,9 @@ const path = require('path');
         logger.debug(error);
         return res.status(500).send(error);
     }
-    source_implementation_file_path = "templates/tbc/step3.py"
-    dest_implementation_file_path = implementation_files_folder_path + "/step3.py"
+    implementation_file_name = "step3.py"
+    source_implementation_file_path = "templates/tbc/" + implementation_file_name
+    dest_implementation_file_path = implementation_files_folder_path + "/" + implementation_file_name
     try{
         source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
         // We have to replace depending on the value of the 'match_function' parameter.
@@ -324,7 +327,7 @@ const path = require('path');
         return res.status(500).send(error);
     }
     try {
-        await models.implementation.create({fileName:dest_implementation_file_path, language:"python", stepId:step_id});
+        await models.implementation.create({fileName:implementation_file_name, language:"python", stepId:step_id});
     } catch(error) {
         error = "Error creating the implementation for step 3: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
         logger.debug(error);
@@ -356,8 +359,9 @@ const path = require('path');
         logger.debug(error);
         return res.status(500).send(error);
     }
-    source_implementation_file_path = "templates/tbc/step4.py"
-    dest_implementation_file_path = implementation_files_folder_path + "/step4.py"
+    implementation_file_name = "step4.py"
+    source_implementation_file_path = "templates/tbc/" + implementation_file_name
+    dest_implementation_file_path = implementation_files_folder_path + "/" + implementation_file_name
     try{
         source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
         // We have to replace using the value of the 'threshold' parameter.
@@ -369,13 +373,12 @@ const path = require('path');
         return res.status(500).send(error);
     }
     try {
-        await models.implementation.create({fileName:dest_implementation_file_path, language:"python", stepId:step_id});
+        await models.implementation.create({fileName:implementation_file_name, language:"python", stepId:step_id});
     } catch(error) {
         error = "Error creating the implementation for step 4: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
         logger.debug(error);
         return res.status(500).send(error);
     }
-
     // Step 5: OUTPUT STEP: write the final candidate clusters to a .csv file.
     var step_name = "step_5_output"
     var step_description = "Read the json file containing the final candidate clusters and write them to a .csv file. This .csv file will contain the following three attributes: (1) instance index of the initial dataset (starting from 0), (2) cluster name (starting from 0 and from the partition with more clusters), and (3) mean value of match with previous partitions."
@@ -402,8 +405,9 @@ const path = require('path');
         logger.debug(error);
         return res.status(500).send(error);
     }
-    source_implementation_file_path = "templates/tbc/step5.py"
-    dest_implementation_file_path = implementation_files_folder_path + "/step5.py"
+    implementation_file_name = "step5.py"
+    source_implementation_file_path = "templates/tbc/" + implementation_file_name
+    dest_implementation_file_path = implementation_files_folder_path + "/" + implementation_file_name
     try{
         source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
         // We have to replace using the value of the 'name' parameter and of the workflow ID, as well as the value of the k parameter.
@@ -426,13 +430,13 @@ const path = require('path');
         return res.status(500).send(error);
     }
     try {
-        await models.implementation.create({fileName:dest_implementation_file_path, language:"python", stepId:step_id});
+        await models.implementation.create({fileName:implementation_file_name, language:"python", stepId:step_id});
     } catch(error) {
         error = "Error creating the implementation for step 5: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
         logger.debug(error);
         return res.status(500).send(error);
     }
-    //await WorkflowUtils.workflowComplete(workflow_id);
+    await WorkflowUtils.workflowComplete(workflow_id);
     return res.sendStatus(200);
 });
 
