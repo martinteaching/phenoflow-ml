@@ -18,8 +18,8 @@ const path = require('path');
  *   post:
  *     security:
  *       - bearerAuth: []
- *     summary: Create a new Trace-based clustering phenotype.
- *     description: Create a phenotype definition based on the Trace-based clustering technique ( PAPER NAME -> A methodology based on Trace based clustering for patient phenotyping , DOI -> doi.org/10.1016/j.knosys.2021.107469 , GITHUB REPO -> github.com/antoniolopezmc/A-methodology-based-on-Trace-based-clustering-for-patient-phenotyping ).
+ *     summary: Create a new Trace-based clustering phenotype
+ *     description: Create a phenotype definition based on the Trace-based clustering technique ( PAPER NAME -> A methodology based on Trace based clustering for patient phenotyping , DOI -> doi.org/10.1016/j.knosys.2021.107469 , GITHUB REPO -> github.com/antoniolopezmc/A-methodology-based-on-Trace-based-clustering-for-patient-phenotyping )
  *     requestBody:
  *       required: true
  *       content:
@@ -29,41 +29,43 @@ const path = require('path');
  *             properties:
  *               k:
  *                 type: integer
- *                 description: number of partitions to generated from the input dataset
+ *                 description: Number of partitions to generated from the input dataset
  *                 minimum: 2
  *               clustering_algorithm:
  *                 type: string
- *                 description: clustering algorithm to apply over the input dataset
+ *                 description: Clustering algorithm to apply over the input dataset
  *                 enum: [kmeans]
  *               match_function:
  *                 type: string
- *                 description: match function to apply between the clusters of different partitions
+ *                 description: Match function to apply between the clusters of different partitions
  *                 enum: [jaccard, jaccard2, dice]
  *               random_seed:
  *                 type: number
- *                 description: seed for the generation of random numbers
+ *                 description: Seed for the generation of random numbers
  *                 minimum: 0
  *               threshold:
  *                 type: number
- *                 description: minimum threshold value used to filter and obtain the final candidate clusters
+ *                 description: Minimum threshold value used to filter and obtain the final candidate clusters
  *               replace:
  *                 type: boolean
- *                 description: if replace is true and the phenotype name already exists, the phenotype will be completely replaced; if replace is false and the phenotype name already exists, an HTTP 500 response code will be returned
+ *                 description: If replace is true and the phenotype name already exists, the phenotype will be completely replaced; if replace is false and the phenotype name already exists, an HTTP 500 response code will be returned
  *               name:
  *                 type: string
- *                 description: the name of the new definition
+ *                 description: The name of the new definition
  *                 example: tbc001
  *               about:
  *                 type: string
- *                 description: a description of the new definition
+ *                 description: A description of the new definition
  *                 example: trace-based clustering with k=200, clustering_algorithm=kmeans, match_function=dice and random_seed=34
  *               userName:
  *                 type: string
- *                 description: the name of a pre-registered author to whom the definition should be attributed
+ *                 description: The name of a pre-registered author to whom the definition should be attributed
  *                 example: antoniolopezmc
  *     responses:
  *       200:
  *         description: Definition added
+ *       500:
+ *         description: Some error occurred
  */
  router.post('/addPhenotype', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algorithms:['RS256']}), async function(req, res, next) {
     req.setTimeout(0);
@@ -115,7 +117,7 @@ const path = require('path');
         }
     } else if ( (req.body.replace.toLowerCase() === "false") && (workflow) ) {
         // If the phenotype/workflow exists and replace is false, an HTTP 500 response code will be returned.
-        return res.status(500).send("There is aldeady a phenotype with the same name.")
+        return res.status(500).send("There is already a phenotype with the same name.")
     }
     // Create a new workflow.
     try {
@@ -437,6 +439,108 @@ const path = require('path');
         return res.status(500).send(error);
     }
     await WorkflowUtils.workflowComplete(workflow_id);
+    return res.sendStatus(200);
+});
+
+/**
+ * @swagger
+ * /phenoflow/tbc/uploadCsvDataset:
+ *   post:
+ *     security:
+ *       - bearerAuth: []
+ *     summary: Upload a .csv dataset
+ *     description: Upload a dataset in CSV format to be used by an specific Trace-based clustering phenotype
+ *     parameters:
+ *       - in: formData
+ *         name: phenotypeName
+ *         type: string
+ *         required: true
+ *         description: Name of the Trace-based clustering phenotype which will use the uploaded dataset
+ *       - in: formData
+ *         name: uploadedCsvDataset
+ *         type: file
+ *         required: true
+ *         description: Uploaded .csv dataset
+ *       - in: formData 
+ *         name: replace
+ *         type: boolean
+ *         description: If replace is true and a dataset with the same name already exists, the file will be replaced; if replace is false and a dataset with the same name already exists, an HTTP 500 response code will be returned
+ *     responses:
+ *       200:
+ *         description: Dataset uploaded
+ *       500:
+ *         description: Some error occurred
+ */
+ router.post('/uploadCsvDataset', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algorithms:['RS256']}), async function(req, res, next) {
+    req.setTimeout(0);
+    if ( !req.body.phenotypeName || !req.body.replace || !req.files.uploadedCsvDataset ) {
+        return res.status(500).send("Missing parameters (see documentation).")
+    }
+    if (Object.keys(req.files).length ==! 1) {
+        return res.status(500).send("Only one file must be uploaded (see documentation).")
+    }
+    if ( (req.body.replace.toLowerCase() !== "true") && (req.body.replace.toLowerCase() !== "false") ) {
+        return res.status(500).send("Error: replace parameter is not valid (see documentation).")
+    }
+    // Check whether the Trace-based clustering phenotype exists.
+    // IMPORTANT: in this point, either no workflow of this type exists or only one exists.
+    // - Other workflows with the same name could exist, but they do not correspond to the Trace-based clustering technique (i.e., they were created using other endpoints).
+    try { 
+        var workflow = await models.workflow.findOne({where:{name:req.body.phenotypeName}});
+        var workflow_id = workflow.id;
+    } catch(error) {
+        error = "Error: workflow with name '" + req.body.phenotypeName + "' does not exist: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Check whether the corresponding folder in 'uploads' exists.
+    workflow_folder_path = "uploads/" + workflow_id
+    try {
+        await fs.stat(workflow_folder_path);
+    } catch(error) {
+        error = "Error: workflow folder (workflow ID = " + workflow_id + ") does not exist in 'uploads': " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Create a new folder called 'datasets' if it does not exist.
+    workflow_datasets_folder_path = workflow_folder_path + "/datasets"
+    try {
+        await fs.stat(workflow_datasets_folder_path);
+    } catch(error) {
+        try {
+            await fs.mkdir(workflow_datasets_folder_path);
+        } catch(error) {
+            error = "Error creating the 'datasets' folder: " + error;
+            logger.debug(error);
+            return res.status(500).send(error);
+        }
+    }
+    // Save the uploaded CSV dataset in 'datasets' folder.
+    var uploadedFileObject = req.files.uploadedCsvDataset
+    var uploadedDatasetPath = workflow_datasets_folder_path + "/" + uploadedFileObject.name
+    // Replace or not depending on the paramter.
+    if (req.body.replace.toLowerCase() === "true") {
+        try {
+            await uploadedFileObject.mv(uploadedDatasetPath)
+        } catch(error) {
+            error = "Error moving the uploaded dataset to 'datasets' folder: " + error;
+            logger.debug(error);
+            return res.status(500).send(error);
+        }
+    } else {
+        try {
+            await fs.stat(uploadedDatasetPath);
+            return res.status(500).send("There is already a dataset with the same name.")
+        } catch(error) {
+            try {
+                await uploadedFileObject.mv(uploadedDatasetPath)
+            } catch(error) {
+                error = "Error moving the uploaded dataset to 'datasets' folder: " + error;
+                logger.debug(error);
+                return res.status(500).send(error);
+            }
+        }
+    }
     return res.sendStatus(200);
 });
 
