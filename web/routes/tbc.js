@@ -473,7 +473,7 @@ const path = require('path');
  */
  router.post('/uploadCsvDataset', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algorithms:['RS256']}), async function(req, res, next) {
     req.setTimeout(0);
-    if ( !req.body.phenotypeName || !req.body.replace || !req.files.uploadedCsvDataset ) {
+    if ( !req.body.phenotypeName || !req.body.replace || !req.files || !req.files.uploadedCsvDataset ) {
         return res.status(500).send("Missing parameters (see documentation).")
     }
     if (Object.keys(req.files).length ==! 1) {
