@@ -485,7 +485,8 @@ const path = require('path');
     // Check whether the Trace-based clustering phenotype exists.
     // IMPORTANT: in this point, either no workflow of this type exists or only one exists.
     // - Other workflows with the same name could exist, but they do not correspond to the Trace-based clustering technique (i.e., they were created using other endpoints).
-    try { 
+    //   ==> This case should not occur (USERS MUST NOT USE HERE A PHENOTYPE THAT IS NOT OF TRACE-BASED CLUSTERING TYPE) and, therefore, it is not handled.
+    try {
         var workflow = await models.workflow.findOne({where:{name:req.body.phenotypeName}});
         var workflow_id = workflow.id;
     } catch(error) {
@@ -541,6 +542,98 @@ const path = require('path');
             }
         }
     }
+    return res.sendStatus(200);
+});
+
+/**
+ * @swagger
+ * /phenoflow/tbc/generate/{workflowName}/{datasetName}:
+ *   get:
+ *     summary: Generate a Trace-based clustering phenotype
+ *     description: Generate a phenotype based on the Trace-based clustering technique, indicanting and existing workflow/phenotype name and an existing dataset name (including its extension)
+ *     parameters:
+ *       - in: path
+ *         name: workflowName
+ *         type: string
+ *         required: true
+ *         description: Name of the existing Trace-based clustering phenotype
+ *       - in: path
+ *         name: datasetName
+ *         type: string
+ *         required: true
+ *         description: Name of the existing dataset (including its extension)
+ *     responses:
+ *       200:
+ *         description: Phenotype generated
+ *       500:
+ *         description: Some error occurred
+ */
+router.get("/generate/:workflowName/:datasetName", async function(req, res, next) {
+    if ( !req.params.workflowName || !req.params.datasetName ) {
+        return res.status(500).send("Missing parameters (see documentation).")
+    }
+    // Check whether a workflow defined by the value of 'workflowName' exists.
+    // IMPORTANT: since it is a Trace-based clustering phenotype, in this point, either no workflow exists or only one exists.
+    // - Other workflows with the same name could exist, but they do not correspond to the Trace-based clustering technique (i.e., they were created using other endpoints).
+    //   ==> This case should not occur (USERS MUST NOT USE HERE A PHENOTYPE THAT IS NOT OF TRACE-BASED CLUSTERING TYPE) and, therefore, it is not handled.
+    try { 
+        var workflow = await models.workflow.findOne({where:{name:req.params.workflowName}});
+        var workflow_id = workflow.id;
+    } catch(error) {
+        error = "Error: workflow with name '" + req.params.workflowName + "' does not exist: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Check whether a dataset called as the value of 'datasetName' exists.
+    dataset_uploads_folder_path = "uploads/" + workflow_id + "/datasets/"
+    dataset_path = dataset_uploads_folder_path + req.params.datasetName
+    try {
+        await fs.stat(dataset_path);
+    } catch(error) {
+        error = "Error: dataset with name '" + req.params.datasetName + "' does not exist in '" + dataset_uploads_folder_path + "' folder: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Create the initial needed folders to store the output files.
+    // IMPORTANT: the folder must be new and different in each case, because it must be empty.
+    //   - For this reason, we use temporal directories, executing 'fs.mkdtemp' method.
+    output_files_folder_path = "output/" + workflow_id + "/"
+    try { // First, 'output/{workflow_id}/' recursively, if it does not exist.
+        await fs.stat(output_files_folder_path);
+    } catch(error) {
+        try {
+            await fs.mkdir(output_files_folder_path, {recursive:true});
+        } catch(error) {
+            error = "Error creating the initial needed folders to store the output files: " + error;
+            logger.debug(error);
+            return res.status(500).send(error);
+        }
+    }
+    try { // Second, a temporal directory inside 'output/{workflow_id}/'.
+        tmp_dir = await fs.mkdtemp(output_files_folder_path)
+    } catch(error) {
+        error = "Error creating the initial needed folders to store the output files: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try { // Third and finally, a directory called as the workflow name, inside the temporal directory.
+        await fs.mkdir(tmp_dir + "/" + req.params.workflowName);
+    } catch(error) {
+        error = "Error creating the initial needed folders to store the output files: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Store the final path for the output files.
+    final_output_path = tmp_dir + "/" + req.params.workflowName + "/"
+    // Templates folder plath.
+    templates_folder_path = "templates/tbc"
+    // Copy 'LICENSE.md' file from templates folder.
+
+    // Copy 'README.md' file from templates folder.
+
+
+
+
     return res.sendStatus(200);
 });
 
