@@ -694,6 +694,12 @@ router.get("/generate/:workflowName/:datasetName", async function(req, res, next
 
 
 
+
+
+
+
+
+
     
 
     // Create the final zip file and send it in the response.
@@ -709,7 +715,8 @@ router.get("/generate/:workflowName/:datasetName", async function(req, res, next
         logger.error(error);
         return res.status(500).send(error);
     }
-    return res.status(200).sendFile(zip_file_name, {root : zip_file_folder});
+    // We use 'download' instead of 'sendFile', because we can specify the downloaded file name.
+    return res.status(200).download(zip_file_path, zip_file_name);
 });
 
 module.exports = router;
