@@ -7,6 +7,7 @@ const op = sequelize.Op;
 const jwt = require('express-jwt');
 const fs = require('fs').promises;
 const sanitizeHtml = require('sanitize-html');
+const AdmZip = require('adm-zip');
 
 const config = require("config");
 const WorkflowUtils = require('../util/workflow');
@@ -625,16 +626,90 @@ router.get("/generate/:workflowName/:datasetName", async function(req, res, next
     }
     // Store the final path for the output files.
     final_output_path = tmp_dir + "/" + req.params.workflowName + "/"
-    // Templates folder plath.
-    templates_folder_path = "templates/tbc"
+    // Upload folder path.
+    uploads_folder_path = "uploads/" + workflow_id + "/python/"
+    // Templates folder path.
+    templates_folder_path = "templates/tbc/"
     // Copy 'LICENSE.md' file from templates folder.
-
+    try {
+        await fs.copyFile(templates_folder_path + 'LICENSE.md', final_output_path + 'LICENSE.md')
+    } catch(error) {
+        error = "Error copying 'LICENSE.md' file: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
     // Copy 'README.md' file from templates folder.
+    try {
+        await fs.copyFile(templates_folder_path + 'README.md', final_output_path + 'README.md')
+    } catch(error) {
+        error = "Error copying 'README.md' file: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Copy python files corresponding to all steps from uploads folder.
+    try {
+        await fs.mkdir(final_output_path + "python");
+    } catch(error) {
+        error = "Error creating 'python' folder: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await fs.copyFile(uploads_folder_path + 'step1.py', final_output_path + 'python/step1.py')
+        await fs.copyFile(uploads_folder_path + 'step2.py', final_output_path + 'python/step2.py')
+        await fs.copyFile(uploads_folder_path + 'step3.py', final_output_path + 'python/step3.py')
+        await fs.copyFile(uploads_folder_path + 'step4.py', final_output_path + 'python/step4.py')
+        await fs.copyFile(uploads_folder_path + 'step5.py', final_output_path + 'python/step5.py')
+    } catch(error) {
+        error = "Error copying python files: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Copy the dataset from uploads folder.
+    try {
+        await fs.mkdir(final_output_path + "dataset");
+    } catch(error) {
+        error = "Error creating 'dataset' folder: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await fs.copyFile(dataset_path, final_output_path + 'dataset/' + req.params.datasetName)
+    } catch(error) {
+        error = "Error copying the dataset: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Copy cwl files corresponding to all steps from templates folder.
+    try {
+        await fs.mkdir(final_output_path + "cwl");
+    } catch(error) {
+        error = "Error creating 'cwl' folder: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
 
 
 
 
-    return res.sendStatus(200);
+
+
+    
+
+    // Create the final zip file and send it in the response.
+    zip_file_folder = tmp_dir + "/"
+    zip_file_name = req.params.workflowName + ".zip"
+    zip_file_path = zip_file_folder + zip_file_name
+    try { 
+        zip = new AdmZip();
+        zip.addLocalFolder(zip_file_folder)
+        zip.writeZip(zip_file_path)
+    } catch(error) {
+        error = "Error creating zip file: " + error;
+        logger.error(error);
+        return res.status(500).send(error);
+    }
+    return res.status(200).sendFile(zip_file_name, {root : zip_file_folder});
 });
 
 module.exports = router;
