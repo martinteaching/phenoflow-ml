@@ -667,14 +667,15 @@ router.get("/generate/:workflowName/:datasetName", async function(req, res, next
     }
     // Copy the dataset from uploads folder.
     try {
-        await fs.mkdir(final_output_path + "dataset");
+        // IMPORTANT: 'files' folder will contain all files needed and generated in all steps.
+        await fs.mkdir(final_output_path + "files");
     } catch(error) {
-        error = "Error creating 'dataset' folder: " + error;
+        error = "Error creating 'files' folder: " + error;
         logger.debug(error);
         return res.status(500).send(error);
     }
     try {
-        await fs.copyFile(dataset_path, final_output_path + 'dataset/' + req.params.datasetName)
+        await fs.copyFile(dataset_path, final_output_path + 'files/' + req.params.datasetName)
     } catch(error) {
         error = "Error copying the dataset: " + error;
         logger.debug(error);
@@ -688,19 +689,20 @@ router.get("/generate/:workflowName/:datasetName", async function(req, res, next
         logger.debug(error);
         return res.status(500).send(error);
     }
+    try {
+        await fs.copyFile(templates_folder_path + 'step1.cwl', final_output_path + 'cwl/step1.cwl')
+        await fs.copyFile(templates_folder_path + 'step2.cwl', final_output_path + 'cwl/step2.cwl')
+        await fs.copyFile(templates_folder_path + 'step3.cwl', final_output_path + 'cwl/step3.cwl')
+        await fs.copyFile(templates_folder_path + 'step4.cwl', final_output_path + 'cwl/step4.cwl')
+        await fs.copyFile(templates_folder_path + 'step5.cwl', final_output_path + 'cwl/step5.cwl')
+    } catch(error) {
+        error = "Error copying cwl files: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // main.cwl
 
-
-
-
-
-
-
-
-
-
-
-
-    
+    // main.yml
 
     // Create the final zip file and send it in the response.
     zip_file_folder = tmp_dir + "/"
