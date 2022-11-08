@@ -700,10 +700,25 @@ router.get("/generate/:workflowName/:datasetName", async function(req, res, next
         logger.debug(error);
         return res.status(500).send(error);
     }
-    // main.cwl
-
-    // main.yml
-
+    // Copy main.cwl file from templates folder.
+    try {
+        await fs.copyFile(templates_folder_path + 'main.cwl', final_output_path + 'main.cwl')
+    } catch(error) {
+        error = "Error copying main.cwl file: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Read main.yml file content (from templates folder), replace it appropriately and write.
+    try{
+        main_yml_file_content = await fs.readFile(templates_folder_path + 'main.yml', "utf8")
+        // We have to replace using the dataset name.
+        new_main_yml_file_content = main_yml_file_content.replaceAll("<DATASET_NAME>", req.params.datasetName);
+        await fs.writeFile(final_output_path + 'main.yml', new_main_yml_file_content, "utf8");
+    } catch(error) {
+        error = "Error creating main.yml file: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
     // Create the final zip file and send it in the response.
     zip_file_folder = tmp_dir + "/"
     zip_file_name = req.params.workflowName + ".zip"

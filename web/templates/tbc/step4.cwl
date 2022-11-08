@@ -1,3 +1,5 @@
+$namespaces:
+  s: http://phenomics.kcl.ac.uk/phenoflow/
 cwlVersion: v1.2
 class: CommandLineTool
 id: step4
@@ -9,16 +11,18 @@ inputs:
   type: File
   inputBinding:
     position: 1
-- doc: Path of the file that contains the matrix of matches in JSON format
-  id: step4_matrix_of_matches_path
-  type: string
+- doc: File that contains the matrix of matches in JSON format
+  id: step4_input_matrix_of_matches
+  type: File
   inputBinding:
     position: 2
 outputs:
 - doc: Final candidate clusters in JSON format generated after executing the step 4
-  id: step4_final_candidate_clusters
+  id: step4_output_final_candidate_clusters
   type: File
+  outputBinding:
+    glob: 'final_candidate_clusters.json'
 requirements:
   DockerRequirement:
-    dockerPull: kclhi/python:latest
+    dockerPull: kclhi/regression:latest
 s:type: logic

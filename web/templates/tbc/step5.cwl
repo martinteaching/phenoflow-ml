@@ -1,3 +1,5 @@
+$namespaces:
+  s: http://phenomics.kcl.ac.uk/phenoflow/
 cwlVersion: v1.2
 class: CommandLineTool
 id: step5
@@ -9,16 +11,18 @@ inputs:
   type: File
   inputBinding:
     position: 1
-- doc: Path of the file that contains the final candidate clusters in JSON format
-  id: step5_final_candidate_clusters_path
-  type: string
+- doc: File that contains the final candidate clusters in JSON format
+  id: step5_input_final_candidate_clusters
+  type: File
   inputBinding:
     position: 2
 outputs:
 - doc: Final candidate clusters in CSV format generated after executing the step 5
-  id: step5_final_candidate_clusters
+  id: step5_output_final_candidate_clusters
   type: File
+  outputBinding:
+    glob: '*.csv'
 requirements:
   DockerRequirement:
-    dockerPull: kclhi/python:latest
+    dockerPull: kclhi/regression:latest
 s:type: output

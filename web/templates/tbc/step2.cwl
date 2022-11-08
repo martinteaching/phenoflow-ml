@@ -1,3 +1,5 @@
+$namespaces:
+  s: http://phenomics.kcl.ac.uk/phenoflow/
 cwlVersion: v1.2
 class: CommandLineTool
 id: step2
@@ -9,16 +11,18 @@ inputs:
   type: File
   inputBinding:
     position: 1
-- doc: Path of the file that contains the dataset
-  id: step2_dataset_path
-  type: string
+- doc: File that contains the dataset
+  id: step2_input_dataset
+  type: File
   inputBinding:
     position: 2
 outputs:
 - doc: Partitions in JSON format generated after executing the step 2
-  id: step2_partitions
+  id: step2_output_partitions
   type: File
+  outputBinding:
+    glob: 'partitions.json'
 requirements:
   DockerRequirement:
-    dockerPull: kclhi/python:latest
+    dockerPull: kclhi/regression:latest
 s:type: logic

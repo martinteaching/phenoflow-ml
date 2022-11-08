@@ -1,3 +1,5 @@
+$namespaces:
+  s: http://phenomics.kcl.ac.uk/phenoflow/
 cwlVersion: v1.2
 class: CommandLineTool
 id: step3
@@ -9,16 +11,18 @@ inputs:
   type: File
   inputBinding:
     position: 1
-- doc: Path of the file that contains the partitions in JSON format
-  id: step3_partitions_path
-  type: string
+- doc: File that contains the partitions in JSON format
+  id: step3_input_partitions
+  type: File
   inputBinding:
     position: 2
 outputs:
 - doc: Matrix of matches in JSON format generated after executing the step 3
-  id: step3_matrix_of_matches
+  id: step3_output_matrix_of_matches
   type: File
+  outputBinding:
+    glob: 'matrix_of_matches.json'
 requirements:
   DockerRequirement:
-    dockerPull: kclhi/python:latest
+    dockerPull: kclhi/regression:latest
 s:type: logic
