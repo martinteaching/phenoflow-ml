@@ -8,6 +8,7 @@ const jwt = require('express-jwt');
 const fs = require('fs').promises;
 const sanitizeHtml = require('sanitize-html');
 const AdmZip = require('adm-zip');
+const got = require("got");
 
 const config = require("config");
 const WorkflowUtils = require('../util/workflow');
@@ -569,7 +570,7 @@ const path = require('path');
  *       500:
  *         description: Some error occurred
  */
-router.get("/generate/:workflowName/:datasetName", async function(req, res, next) {
+router.get("/generate/:workflowName/:datasetName", jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algorithms:['RS256']}), async function(req, res, next) {
     if ( !req.params.workflowName || !req.params.datasetName ) {
         return res.status(500).send("Missing parameters (see documentation).")
     }
@@ -696,7 +697,7 @@ router.get("/generate/:workflowName/:datasetName", async function(req, res, next
         await fs.copyFile(templates_folder_path + 'step4.cwl', final_output_path + 'cwl/step4.cwl')
         await fs.copyFile(templates_folder_path + 'step5.cwl', final_output_path + 'cwl/step5.cwl')
     } catch(error) {
-        error = "Error copying cwl files: " + error;
+        error = "Error copying the cwl files corresponding to the steps: " + error;
         logger.debug(error);
         return res.status(500).send(error);
     }
@@ -716,6 +717,207 @@ router.get("/generate/:workflowName/:datasetName", async function(req, res, next
         await fs.writeFile(final_output_path + 'main.yml', new_main_yml_file_content, "utf8");
     } catch(error) {
         error = "Error creating main.yml file: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Create the final zip file and send it in the response.
+    zip_file_folder = tmp_dir + "/"
+    zip_file_name = req.params.workflowName + ".zip"
+    zip_file_path = zip_file_folder + zip_file_name
+    try { 
+        zip = new AdmZip();
+        zip.addLocalFolder(zip_file_folder)
+        zip.writeZip(zip_file_path)
+    } catch(error) {
+        error = "Error creating zip file: " + error;
+        logger.error(error);
+        return res.status(500).send(error);
+    }
+    // We use 'download' instead of 'sendFile', because we can specify the downloaded file name.
+    return res.status(200).download(zip_file_path, zip_file_name);
+});
+
+/**
+ * @swagger
+ * /phenoflow/tbc/generate/{workflowName}/{datasetName}:
+ *   get:
+ *     summary: Generate a Trace-based clustering phenotype
+ *     description: Generate a phenotype based on the Trace-based clustering technique, indicanting and existing workflow/phenotype name and an existing dataset name (including its extension)
+ *     parameters:
+ *       - in: path
+ *         name: workflowName
+ *         type: string
+ *         required: true
+ *         description: Name of the existing Trace-based clustering phenotype
+ *       - in: path
+ *         name: datasetName
+ *         type: string
+ *         required: true
+ *         description: Name of the existing dataset (including its extension)
+ *     responses:
+ *       200:
+ *         description: Phenotype generated
+ *       500:
+ *         description: Some error occurred
+ */
+ router.get("/generate2/:workflowName/:datasetName", jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algorithms:['RS256']}), async function(req, res, next) {
+    if ( !req.params.workflowName || !req.params.datasetName ) {
+        return res.status(500).send("Missing parameters (see documentation).")
+    }
+    // Check whether a workflow defined by the value of 'workflowName' exists.
+    // IMPORTANT: since it is a Trace-based clustering phenotype, in this point, either no workflow exists or only one exists.
+    // - Other workflows with the same name could exist, but they do not correspond to the Trace-based clustering technique (i.e., they were created using other endpoints).
+    //   ==> This case should not occur (USERS MUST NOT USE HERE A PHENOTYPE THAT IS NOT OF TRACE-BASED CLUSTERING TYPE) and, therefore, it is not handled.
+    try { 
+        var workflow = await models.workflow.findOne({where:{name:req.params.workflowName}});
+        var workflow_id = workflow.id;
+    } catch(error) {
+        error = "Error: workflow with name '" + req.params.workflowName + "' does not exist: " + (error&&error.errors&&error.errors[0]&&error.errors[0].message?error.errors[0].message:error);
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Check whether a dataset called as the value of 'datasetName' exists.
+    dataset_uploads_folder_path = "uploads/" + workflow_id + "/datasets/"
+    dataset_path = dataset_uploads_folder_path + req.params.datasetName
+    try {
+        await fs.stat(dataset_path);
+    } catch(error) {
+        error = "Error: dataset with name '" + req.params.datasetName + "' does not exist in '" + dataset_uploads_folder_path + "' folder: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Create the initial needed folders to store the output files.
+    // IMPORTANT: the folder must be new and different in each case, because it must be empty.
+    //   - For this reason, we use temporal directories, executing 'fs.mkdtemp' method.
+    output_files_folder_path = "output/" + workflow_id + "/"
+    try { // First, 'output/{workflow_id}/' recursively, if it does not exist.
+        await fs.stat(output_files_folder_path);
+    } catch(error) {
+        try {
+            await fs.mkdir(output_files_folder_path, {recursive:true});
+        } catch(error) {
+            error = "Error creating the initial needed folders to store the output files: " + error;
+            logger.debug(error);
+            return res.status(500).send(error);
+        }
+    }
+    try { // Second, a temporal directory inside 'output/{workflow_id}/'.
+        tmp_dir = await fs.mkdtemp(output_files_folder_path)
+    } catch(error) {
+        error = "Error creating the initial needed folders to store the output files: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try { // Third and finally, a directory called as the workflow name, inside the temporal directory.
+        await fs.mkdir(tmp_dir + "/" + req.params.workflowName);
+    } catch(error) {
+        error = "Error creating the initial needed folders to store the output files: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Store the final path for the output files.
+    final_output_path = tmp_dir + "/" + req.params.workflowName + "/"
+    // Upload folder path.
+    uploads_folder_path = "uploads/" + workflow_id + "/python/"
+    // Templates folder path.
+    templates_folder_path = "templates/tbc/"
+    // Copy 'LICENSE.md' file from templates folder.
+    try {
+        await fs.copyFile(templates_folder_path + 'LICENSE.md', final_output_path + 'LICENSE.md')
+    } catch(error) {
+        error = "Error copying 'LICENSE.md' file: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Copy 'README.md' file from templates folder.
+    try {
+        await fs.copyFile(templates_folder_path + 'README.md', final_output_path + 'README.md')
+    } catch(error) {
+        error = "Error copying 'README.md' file: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Copy python files corresponding to all steps from uploads folder.
+    try {
+        await fs.mkdir(final_output_path + "python");
+    } catch(error) {
+        error = "Error creating 'python' folder: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await fs.copyFile(uploads_folder_path + 'step1.py', final_output_path + 'python/step1.py')
+        await fs.copyFile(uploads_folder_path + 'step2.py', final_output_path + 'python/step2.py')
+        await fs.copyFile(uploads_folder_path + 'step3.py', final_output_path + 'python/step3.py')
+        await fs.copyFile(uploads_folder_path + 'step4.py', final_output_path + 'python/step4.py')
+        await fs.copyFile(uploads_folder_path + 'step5.py', final_output_path + 'python/step5.py')
+    } catch(error) {
+        error = "Error copying python files: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Copy the dataset from uploads folder.
+    try {
+        // IMPORTANT: 'files' folder will contain all files needed and generated in all steps.
+        await fs.mkdir(final_output_path + "files");
+    } catch(error) {
+        error = "Error creating 'files' folder: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await fs.copyFile(dataset_path, final_output_path + 'files/' + req.params.datasetName)
+    } catch(error) {
+        error = "Error copying the dataset: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Call generator endpoint to generate the cwl files corresponding to all steps.
+    try {
+        await fs.mkdir(final_output_path + "cwl");
+    } catch(error) {
+        error = "Error creating 'cwl' folder: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        generator_url = config.get("generator.URL") + "/tbc/getStepCwl/1"
+        step1_cwl_file_content = await got.get(generator_url);
+        await fs.writeFile(final_output_path + 'cwl/step1.cwl', step1_cwl_file_content, "utf8");
+        generator_url = config.get("generator.URL") + "/tbc/getStepCwl/2"
+        step2_cwl_file_content = await got.get(generator_url);
+        await fs.writeFile(final_output_path + 'cwl/step2.cwl', step2_cwl_file_content, "utf8");
+        generator_url = config.get("generator.URL") + "/tbc/getStepCwl/3"
+        step3_cwl_file_content = await got.get(generator_url);
+        await fs.writeFile(final_output_path + 'cwl/step3.cwl', step3_cwl_file_content, "utf8");
+        generator_url = config.get("generator.URL") + "/tbc/getStepCwl/4"
+        step4_cwl_file_content = await got.get(generator_url);
+        await fs.writeFile(final_output_path + 'cwl/step4.cwl', step4_cwl_file_content, "utf8");
+        generator_url = config.get("generator.URL") + "/tbc/getStepCwl/5"
+        step5_cwl_file_content = await got.get(generator_url);
+        await fs.writeFile(final_output_path + 'cwl/step5.cwl', step5_cwl_file_content, "utf8");
+    } catch(error) {
+        error = "Error generating the cwl files corresponding to the steps (" + generator_url + "): " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Call generator endpoint to generate main.cwl file.
+    try {
+        generator_url = config.get("generator.URL") + "/tbc/getMainCwl"
+        main_cwl_file_content = await got.get(generator_url);
+        await fs.writeFile(final_output_path + 'main.cwl', main_cwl_file_content, "utf8");
+    } catch(error) {
+        error = "Error generating main.cwl file (" + generator_url + "): " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    // Call generator endpoint to generate main.yml file.
+    try {
+        generator_url = config.get("generator.URL") + "/tbc/generateMainYml/" + req.params.datasetName
+        main_yml_file_content = await got.get(generator_url);
+        await fs.writeFile(final_output_path + 'main.yml', main_yml_file_content, "utf8");
+    } catch(error) {
+        error = "Error generating main.yml file (" + generator_url + "): " + error;
         logger.debug(error);
         return res.status(500).send(error);
     }
