@@ -71,265 +71,110 @@ async def generate(request):
 #############################################################################
 #############################################################################
 
-@app.route('/tbc/getStep1Cwl', methods=['GET'])
-async def tbcGetStep1Cwl(request):
+@app.route('/tbc/getStepCwl/{step_number:int}', methods=['GET'])
+async def tbcGetStepCwl(request):
+  # step_number must be between 1 and 5 (both included).
+  step_number_param = request.path_params['step_number']
+  if (step_number_param < 1) or (step_number_param > 5):
+    return Response("ERROR: 'step_number' parameter must be an integer between 1 and 5 (both included).", status_code = 500)
   try:
     # CommandLineTool
-    step1 = cwlgen.CommandLineTool(
-                tool_id='step1',
-                base_command='python',
-                label="step1",
-                doc="CWL file to run automatically the step 1",
-                cwl_version="v1.0"
-                )
+    step = cwlgen.CommandLineTool(
+                  tool_id='step' + str(step_number_param),
+                  base_command='python',
+                  label="step" + str(step_number_param),
+                  doc="CWL file to run automatically step" + str(step_number_param),
+                  cwl_version="v1.0"
+                  )
     # namespaces
-    step1_namespace = cwlgen.Namespaces()
-    step1_namespace.name = "$namespaces"
-    step1_namespace.s = "http://phenomics.kcl.ac.uk/phenoflow/"
-    step1.namespaces = step1_namespace
+    step_namespace = cwlgen.Namespaces()
+    step_namespace.name = "$namespaces"
+    step_namespace.s = "http://phenomics.kcl.ac.uk/phenoflow/"
+    step.namespaces = step_namespace
     # requirements
     # - IMPORTANT: it must be a list.
-    step1.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
+    step.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
     # metadata
-    metadata = {'type' : 'load'}
-    step1.metadata = cwlgen.Metadata(**metadata)
+    if (step_number_param == 1):
+      metadata = {'type' : 'load'}
+    elif ((step_number_param > 1) and (step_number_param < 5)): # between 1 and 5 (both NOT included).
+      metadata = {'type' : 'logic'}
+    elif (step_number_param == 5):
+      metadata = {'type' : 'output'}
+    else:
+      # We checked at the beginning that 'step_number_param' parameter is ok. This should never happen.
+      return Response("CRITICAL ERROR (metadata): this should never happen.", status_code = 500)
+    step.metadata = cwlgen.Metadata(**metadata)
     # inputs
-    step1_python_file = cwlgen.CommandInputParameter(
-                            param_id='step1_python_file',
-                            label='step1_python_file',
-                            param_type='File',
-                            input_binding=cwlgen.CommandLineBinding(position=1),
-                            doc='Python file corresponding to the step 1'
-                            )
-    step1_input_dataset = cwlgen.CommandInputParameter(
-                            param_id='step1_input_dataset',
-                            label='step1_input_dataset',
-                            param_type='File',
-                            input_binding=cwlgen.CommandLineBinding(position=2),
-                            doc='File that contains the input dataset'
-                            )
-    step1.inputs.append(step1_python_file)
-    step1.inputs.append(step1_input_dataset)
+    step_python_file = cwlgen.CommandInputParameter(
+                              param_id='step' + str(step_number_param) + '_python_file',
+                              label='step' + str(step_number_param) + '_python_file',
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=1),
+                              doc='Python file corresponding to step' + str(step_number_param)
+                              )
+    if (step_number_param == 1):
+      step_second_input_param_id_label = "step1_input_dataset" # In this case, "param_id" and "label" have the same value.
+      step_second_input_doc = "File that contains the input dataset"
+    elif (step_number_param == 2):
+      step_second_input_param_id_label = "step2_input_dataset" # In this case, "param_id" and "label" have the same value.
+      step_second_input_doc = "File that contains the dataset"
+    elif (step_number_param == 3):
+      step_second_input_param_id_label = "step3_input_partitions" # In this case, "param_id" and "label" have the same value.
+      step_second_input_doc = "File that contains the partitions in JSON format"
+    elif (step_number_param == 4):
+      step_second_input_param_id_label = "step4_input_matrix_of_matches" # In this case, "param_id" and "label" have the same value.
+      step_second_input_doc = "File that contains the matrix of matches in JSON format"
+    elif (step_number_param == 5):
+      step_second_input_param_id_label = "step5_input_final_candidate_clusters" # In this case, "param_id" and "label" have the same value.
+      step_second_input_doc = "File that contains the final candidate clusters in JSON format"
+    else:
+      # We checked at the beginning that 'step_number_param' parameter is ok. This should never happen.
+      return Response("CRITICAL ERROR (step_second_input): this should never happen.", status_code = 500)
+    step_second_input = cwlgen.CommandInputParameter(
+                              param_id=step_second_input_param_id_label,
+                              label=step_second_input_param_id_label,
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=2),
+                              doc=step_second_input_doc
+                              )
+    step.inputs.append(step_python_file)
+    step.inputs.append(step_second_input)
     # outputs
-    step1_output_dataset = cwlgen.CommandOutputParameter(
-                                          param_id='step1_output_dataset',
-                                          label='step1_output_dataset',
-                                          param_type='File',
-                                          output_binding=cwlgen.CommandOutputBinding(glob="*.csv"),
-                                          doc='Dataset generated after executing the step 1'
-                                          )
-    step1.outputs.append(step1_output_dataset)
-    return PlainTextResponse(step1.export_string())
-  except Exception as e: # Any exception.
-    return Response("ERROR generating step1.cwl file: " + str(e), status_code = 500)
-
-@app.route('/tbc/getStep2Cwl', methods=['GET'])
-async def tbcGetStep2Cwl(request):
-  try:
-    # CommandLineTool
-    step2 = cwlgen.CommandLineTool(
-                tool_id='step2',
-                base_command='python',
-                label="step2",
-                doc="CWL file to run automatically the step 2",
-                cwl_version="v1.0"
-                )
-    # namespaces
-    step2_namespace = cwlgen.Namespaces()
-    step2_namespace.name = "$namespaces"
-    step2_namespace.s = "http://phenomics.kcl.ac.uk/phenoflow/"
-    step2.namespaces = step2_namespace
-    # requirements
-    # - IMPORTANT: it must be a list.
-    step2.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
-    # metadata
-    metadata = {'type' : 'logic'}
-    step2.metadata = cwlgen.Metadata(**metadata)
-    # inputs
-    step2_python_file = cwlgen.CommandInputParameter(
-                            param_id='step2_python_file',
-                            label='step2_python_file',
-                            param_type='File',
-                            input_binding=cwlgen.CommandLineBinding(position=1),
-                            doc='Python file corresponding to the step 2'
-                            )
-    step2_input_dataset = cwlgen.CommandInputParameter(
-                            param_id='step2_input_dataset',
-                            label='step2_input_dataset',
-                            param_type='File',
-                            input_binding=cwlgen.CommandLineBinding(position=2),
-                            doc='File that contains the dataset'
-                            )
-    step2.inputs.append(step2_python_file)
-    step2.inputs.append(step2_input_dataset)
-    # outputs
-    step2_output_partitions = cwlgen.CommandOutputParameter(
-                                          param_id='step2_output_partitions',
-                                          label='step2_output_partitions',
-                                          param_type='File',
-                                          output_binding=cwlgen.CommandOutputBinding(glob="partitions.json"),
-                                          doc='Partitions in JSON format generated after executing the step 2'
-                                          )
-    step2.outputs.append(step2_output_partitions)
-    return PlainTextResponse(step2.export_string())
-  except Exception as e: # Any exception.
-    return Response("ERROR generating step2.cwl file: " + str(e), status_code = 500)
-
-@app.route('/tbc/getStep3Cwl', methods=['GET'])
-async def tbcGetStep3Cwl(request):
-  try:
-    # CommandLineTool
-    step3 = cwlgen.CommandLineTool(
-                tool_id='step3',
-                base_command='python',
-                label="step3",
-                doc="CWL file to run automatically the step 3",
-                cwl_version="v1.0"
-                )
-    # namespaces
-    step3_namespace = cwlgen.Namespaces()
-    step3_namespace.name = "$namespaces"
-    step3_namespace.s = "http://phenomics.kcl.ac.uk/phenoflow/"
-    step3.namespaces = step3_namespace
-    # requirements
-    # - IMPORTANT: it must be a list.
-    step3.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
-    # metadata
-    metadata = {'type' : 'logic'}
-    step3.metadata = cwlgen.Metadata(**metadata)
-    # inputs
-    step3_python_file = cwlgen.CommandInputParameter(
-                            param_id='step3_python_file',
-                            label='step3_python_file',
-                            param_type='File',
-                            input_binding=cwlgen.CommandLineBinding(position=1),
-                            doc='Python file corresponding to the step 3'
-                            )
-    step3_input_partitions = cwlgen.CommandInputParameter(
-                            param_id='step3_input_partitions',
-                            label='step3_input_partitions',
-                            param_type='File',
-                            input_binding=cwlgen.CommandLineBinding(position=2),
-                            doc='File that contains the partitions in JSON format'
-                            )
-    step3.inputs.append(step3_python_file)
-    step3.inputs.append(step3_input_partitions)
-    # outputs
-    step3_output_matrix_of_matches = cwlgen.CommandOutputParameter(
-                                          param_id='step3_output_matrix_of_matches',
-                                          label='step3_output_matrix_of_matches',
-                                          param_type='File',
-                                          output_binding=cwlgen.CommandOutputBinding(glob="matrix_of_matches.json"),
-                                          doc='Matrix of matches in JSON format generated after executing the step 3'
-                                          )
-    step3.outputs.append(step3_output_matrix_of_matches)
-    return PlainTextResponse(step3.export_string())
-  except Exception as e: # Any exception.
-    return Response("ERROR generating step3.cwl file: " + str(e), status_code = 500)
-
-@app.route('/tbc/getStep4Cwl', methods=['GET'])
-async def tbcGetStep4Cwl(request):
-  try:
-    # CommandLineTool
-    step4 = cwlgen.CommandLineTool(
-                tool_id='step4',
-                base_command='python',
-                label="step4",
-                doc="CWL file to run automatically the step 4",
-                cwl_version="v1.0"
-                )
-    # namespaces
-    step4_namespace = cwlgen.Namespaces()
-    step4_namespace.name = "$namespaces"
-    step4_namespace.s = "http://phenomics.kcl.ac.uk/phenoflow/"
-    step4.namespaces = step4_namespace
-    # requirements
-    # - IMPORTANT: it must be a list.
-    step4.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
-    # metadata
-    metadata = {'type' : 'logic'}
-    step4.metadata = cwlgen.Metadata(**metadata)
-    # inputs
-    step4_python_file = cwlgen.CommandInputParameter(
-                            param_id='step4_python_file',
-                            label='step4_python_file',
-                            param_type='File',
-                            input_binding=cwlgen.CommandLineBinding(position=1),
-                            doc='Python file corresponding to the step 4'
-                            )
-    step4_input_matrix_of_matches = cwlgen.CommandInputParameter(
-                            param_id='step4_input_matrix_of_matches',
-                            label='step4_input_matrix_of_matches',
-                            param_type='File',
-                            input_binding=cwlgen.CommandLineBinding(position=2),
-                            doc='File that contains the matrix of matches in JSON format'
-                            )
-    step4.inputs.append(step4_python_file)
-    step4.inputs.append(step4_input_matrix_of_matches)
-    # outputs
-    step4_output_final_candidate_clusters = cwlgen.CommandOutputParameter(
-                                          param_id='step4_output_final_candidate_clusters',
-                                          label='step4_output_final_candidate_clusters',
-                                          param_type='File',
-                                          output_binding=cwlgen.CommandOutputBinding(glob="final_candidate_clusters.json"),
-                                          doc='Final candidate clusters in JSON format generated after executing the step 4'
-                                          )
-    step4.outputs.append(step4_output_final_candidate_clusters)
-    return PlainTextResponse(step4.export_string())
-  except Exception as e: # Any exception.
-    return Response("ERROR generating step4.cwl file: " + str(e), status_code = 500)
-
-@app.route('/tbc/getStep5Cwl', methods=['GET'])
-async def tbcGetStep5Cwl(request):
-  try:
-    # CommandLineTool
-    step5 = cwlgen.CommandLineTool(
-                tool_id='step5',
-                base_command='python',
-                label="step5",
-                doc="CWL file to run automatically the step 5",
-                cwl_version="v1.0"
-                )
-    # namespaces
-    step5_namespace = cwlgen.Namespaces()
-    step5_namespace.name = "$namespaces"
-    step5_namespace.s = "http://phenomics.kcl.ac.uk/phenoflow/"
-    step5.namespaces = step5_namespace
-    # requirements
-    # - IMPORTANT: it must be a list.
-    step5.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
-    # metadata
-    metadata = {'type' : 'output'}
-    step5.metadata = cwlgen.Metadata(**metadata)
-    # inputs
-    step5_python_file = cwlgen.CommandInputParameter(
-                            param_id='step5_python_file',
-                            label='step5_python_file',
-                            param_type='File',
-                            input_binding=cwlgen.CommandLineBinding(position=1),
-                            doc='Python file corresponding to the step 5'
-                            )
-    step5_input_final_candidate_clusters = cwlgen.CommandInputParameter(
-                            param_id='step5_input_final_candidate_clusters',
-                            label='step5_input_final_candidate_clusters',
-                            param_type='File',
-                            input_binding=cwlgen.CommandLineBinding(position=2),
-                            doc='File that contains the final candidate clusters in JSON format'
-                            )
-    step5.inputs.append(step5_python_file)
-    step5.inputs.append(step5_input_final_candidate_clusters)
-    # outputs
-    step5_output_final_candidate_clusters = cwlgen.CommandOutputParameter(
-                                          param_id='step5_output_final_candidate_clusters',
-                                          label='step5_output_final_candidate_clusters',
-                                          param_type='File',
-                                          output_binding=cwlgen.CommandOutputBinding(glob="*.csv"),
-                                          doc='Final candidate clusters in CSV format generated after executing the step 5'
-                                          )
-    step5.outputs.append(step5_output_final_candidate_clusters)
-    return PlainTextResponse(step5.export_string())
-  except Exception as e: # Any exception.
-    return Response("ERROR generating step5.cwl file: " + str(e), status_code = 500)
+    if (step_number_param == 1):
+      step_output_param_id_label = "step1_output_dataset" # In this case, "param_id" and "label" have the same value.
+      step_output_doc = "Dataset generated after executing step1"
+      step_output_glob = "*.csv"
+    elif (step_number_param == 2):
+      step_output_param_id_label = "step2_output_partitions" # In this case, "param_id" and "label" have the same value.
+      step_output_doc = "Partitions in JSON format generated after executing step2"
+      step_output_glob = "partitions.json"
+    elif (step_number_param == 3):
+      step_output_param_id_label = "step3_output_matrix_of_matches" # In this case, "param_id" and "label" have the same value.
+      step_output_doc = "Matrix of matches in JSON format generated after executing step3"
+      step_output_glob = "matrix_of_matches.json"
+    elif (step_number_param == 4):
+      step_output_param_id_label = "step4_output_final_candidate_clusters" # In this case, "param_id" and "label" have the same value.
+      step_output_doc = "Final candidate clusters in JSON format generated after executing step4"
+      step_output_glob = "final_candidate_clusters.json"
+    elif (step_number_param == 5):
+      step_output_param_id_label = "step5_output_final_candidate_clusters" # In this case, "param_id" and "label" have the same value.
+      step_output_doc = "Final candidate clusters in CSV format generated after executing step5"
+      step_output_glob = "*.csv"
+    else:
+      # We checked at the beginning that 'step_number_param' parameter is ok. This should never happen.
+      return Response("CRITICAL ERROR (step_output): this should never happen.", status_code = 500)
+    step_output = cwlgen.CommandOutputParameter(
+                                param_id=step_output_param_id_label,
+                                label=step_output_param_id_label,
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob=step_output_glob),
+                                doc=step_output_doc
+                                )
+    step.outputs.append(step_output)
+    return PlainTextResponse(step.export_string())
+  except Exception as e:
+    return Response("ERROR generating step" + str(step_number_param) + ".cwl file: " + str(e), status_code = 500)
 
 @app.route('/tbc/getMainCwl', methods=['GET'])
 async def tbcGetMainCwl(request):
@@ -389,7 +234,7 @@ async def tbcGetMainCwl(request):
     workflow_input_step1_python_file = cwlgen.workflow.InputParameter(
                                         param_id="step1_python_file",
                                         label="step1_python_file",
-                                        doc="Python file corresponding to the step 1",
+                                        doc="Python file corresponding to step1",
                                         param_type="File"
                                         )
     tbc_workflow.inputs.append( workflow_input_step1_python_file )
@@ -403,28 +248,28 @@ async def tbcGetMainCwl(request):
     workflow_input_step2_python_file = cwlgen.workflow.InputParameter(
                                         param_id="step2_python_file",
                                         label="step2_python_file",
-                                        doc="Python file corresponding to the step 2",
+                                        doc="Python file corresponding to step2",
                                         param_type="File"
                                         )
     tbc_workflow.inputs.append( workflow_input_step2_python_file )
     workflow_input_step3_python_file = cwlgen.workflow.InputParameter(
                                         param_id="step3_python_file",
                                         label="step3_python_file",
-                                        doc="Python file corresponding to the step 3",
+                                        doc="Python file corresponding to step3",
                                         param_type="File"
                                         )
     tbc_workflow.inputs.append( workflow_input_step3_python_file )
     workflow_input_step4_python_file = cwlgen.workflow.InputParameter(
                                         param_id="step4_python_file",
                                         label="step4_python_file",
-                                        doc="Python file corresponding to the step 4",
+                                        doc="Python file corresponding to step4",
                                         param_type="File"
                                         )
     tbc_workflow.inputs.append( workflow_input_step4_python_file )
     workflow_input_step5_python_file = cwlgen.workflow.InputParameter(
                                         param_id="step5_python_file",
                                         label="step5_python_file",
-                                        doc="Python file corresponding to the step 5",
+                                        doc="Python file corresponding to step5",
                                         param_type="File"
                                         )
     tbc_workflow.inputs.append( workflow_input_step5_python_file )
@@ -433,7 +278,7 @@ async def tbcGetMainCwl(request):
                                 param_id="step5_output_final_candidate_clusters",
                                 output_source="step5/step5_output_final_candidate_clusters",
                                 label="step5_output_final_candidate_clusters",
-                                doc="Final candidate clusters in CSV format",
+                                doc="Final candidate clusters in CSV format generated after executing step5",
                                 param_type="File"
                                 )
     tbc_workflow.outputs.append(workflow_output)
