@@ -882,19 +882,19 @@ router.get("/generate/:workflowName/:datasetName", jwt({secret:config.get("jwt.R
     }
     try {
         generator_url = config.get("generator.URL") + "/tbc/getStepCwl/1"
-        step1_cwl_file_content = await got.get(generator_url);
+        step1_cwl_file_content = await got.get(generator_url).text();
         await fs.writeFile(final_output_path + 'cwl/step1.cwl', step1_cwl_file_content, "utf8");
         generator_url = config.get("generator.URL") + "/tbc/getStepCwl/2"
-        step2_cwl_file_content = await got.get(generator_url);
+        step2_cwl_file_content = await got.get(generator_url).text();
         await fs.writeFile(final_output_path + 'cwl/step2.cwl', step2_cwl_file_content, "utf8");
         generator_url = config.get("generator.URL") + "/tbc/getStepCwl/3"
-        step3_cwl_file_content = await got.get(generator_url);
+        step3_cwl_file_content = await got.get(generator_url).text();
         await fs.writeFile(final_output_path + 'cwl/step3.cwl', step3_cwl_file_content, "utf8");
         generator_url = config.get("generator.URL") + "/tbc/getStepCwl/4"
-        step4_cwl_file_content = await got.get(generator_url);
+        step4_cwl_file_content = await got.get(generator_url).text();
         await fs.writeFile(final_output_path + 'cwl/step4.cwl', step4_cwl_file_content, "utf8");
         generator_url = config.get("generator.URL") + "/tbc/getStepCwl/5"
-        step5_cwl_file_content = await got.get(generator_url);
+        step5_cwl_file_content = await got.get(generator_url).text();
         await fs.writeFile(final_output_path + 'cwl/step5.cwl', step5_cwl_file_content, "utf8");
     } catch(error) {
         error = "Error generating the cwl files corresponding to the steps (" + generator_url + "): " + error;
@@ -904,7 +904,7 @@ router.get("/generate/:workflowName/:datasetName", jwt({secret:config.get("jwt.R
     // Call generator endpoint to generate main.cwl file.
     try {
         generator_url = config.get("generator.URL") + "/tbc/getMainCwl"
-        main_cwl_file_content = await got.get(generator_url);
+        main_cwl_file_content = await got.get(generator_url).text();
         await fs.writeFile(final_output_path + 'main.cwl', main_cwl_file_content, "utf8");
     } catch(error) {
         error = "Error generating main.cwl file (" + generator_url + "): " + error;
@@ -914,7 +914,7 @@ router.get("/generate/:workflowName/:datasetName", jwt({secret:config.get("jwt.R
     // Call generator endpoint to generate main.yml file.
     try {
         generator_url = config.get("generator.URL") + "/tbc/generateMainYml/" + req.params.datasetName
-        main_yml_file_content = await got.get(generator_url);
+        main_yml_file_content = await got.get(generator_url).text();
         await fs.writeFile(final_output_path + 'main.yml', main_yml_file_content, "utf8");
     } catch(error) {
         error = "Error generating main.yml file (" + generator_url + "): " + error;
