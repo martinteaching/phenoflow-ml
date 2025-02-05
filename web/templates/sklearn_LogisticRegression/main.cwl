@@ -68,34 +68,24 @@ inputs:
     id: step2_python_file
     doc: Python file corresponding to the step 2
     type: File
-  step2_input_train_dataset:
-    id: step2_input_train_dataset
-    doc: Train dataset corresponding to the step 2
-    type: File
-  step2_input_test_dataset:
-    id: step2_input_test_dataset
-    doc: Test dataset corresponding to the step 2
-    type: File
   step3_python_file:
     id: step3_python_file
     doc: Python file corresponding to the step 3
     type: File
-
-
-
-
-  step5_python_file:
-    id: step5_python_file
-    doc: Python file corresponding to the step 5
-    type: File
-
-
-
 outputs:
-  step5_output_final_candidate_clusters:
-    id: step5_output_final_candidate_clusters
-    doc: Final candidate clusters in CSV format generated after executing the step 5
+  step3_output_train_dataset_with_predictions:
+    id: step3_output_train_dataset_with_predictions
+    doc: Train dataset in CSV format with the final predictions
     type: File
-    outputSource: step5/step5_output_final_candidate_clusters
+    outputSource: step3/step3_output_train_dataset_with_predictions
+  step3_output_test_dataset_with_predictions:
+    id: step3_output_test_dataset_with_predictions
+    doc: Test dataset in CSV format with the final predictions
+    type: File
+    outputSource: step3/step3_output_test_dataset_with_predictions
+  step3_output_pickle_model:
+    id: step3_output_pickle_model
+    doc: Model in pickle format
+    outputSource: step3/step3_output_pickle_model
 requirements:
   SubworkflowFeatureRequirement: {}
