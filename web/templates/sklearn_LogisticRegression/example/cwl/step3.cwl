@@ -31,12 +31,12 @@ outputs:
   id: step3_output_train_dataset_with_predictions
   type: File
   outputBinding:
-    glob: '*.csv'
+    glob: '*_output_train_dataset_with_predictions.csv'
 - doc: Test dataset in CSV format with the final predictions
   id: step3_output_test_dataset_with_predictions
   type: File
   outputBinding:
-    glob: '*.csv'
+    glob: '*_output_test_dataset_with_predictions.csv'
 - doc: Model in pickle format
   id: step3_output_pickle_model
   type: File

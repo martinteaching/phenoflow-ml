@@ -19,7 +19,6 @@ _default_params = {
     "random_state" : None,
     "solver" : 'lbfgs',
     "max_iter" : 100,
-    "multi_class" : 'deprecated',
     "verbose" : 0,
     "warm_start" : False,
     "n_jobs" : None,
@@ -27,7 +26,7 @@ _default_params = {
 }
 
 # Class name.
-class_name = "class"
+class_name = "Class"
 att_name_for_predictions = class_name + "_pred"
 # Read the input datasets.
 train_dataset = pd.read_csv(sys.argv[1])
@@ -46,7 +45,6 @@ class_weight_value = None or _default_params["class_weight"]
 random_state_value = None or _default_params["random_state"]
 solver_value = None or _default_params["solver"]
 max_iter_value = None or _default_params["max_iter"]
-multi_class_value = None or _default_params["multi_class"]
 verbose_value = None or _default_params["verbose"]
 warm_start_value = None or _default_params["warm_start"]
 n_jobs_value = None or _default_params["n_jobs"]
@@ -55,7 +53,7 @@ l1_ratio_value = None or _default_params["l1_ratio"]
 model = LogisticRegression(penalty = penalty_value, dual = dual_value, tol = tol_value, C = C_value,
                            fit_intercept = fit_intercept_value, intercept_scaling = intercept_scaling_value,
                            class_weight = class_weight_value, random_state = random_state_value,
-                           solver = solver_value, max_iter = max_iter_value, multi_class = multi_class_value,
+                           solver = solver_value, max_iter = max_iter_value,
                            verbose = verbose_value, warm_start = warm_start_value, n_jobs = n_jobs_value, l1_ratio = l1_ratio_value)
 # Split the train data into X and y.
 X = train_dataset.drop(columns=[class_name], inplace=False)
