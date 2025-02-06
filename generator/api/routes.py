@@ -298,3 +298,133 @@ async def tbcGenerateMainYml(request):
     return PlainTextResponse(main_yml_file_content)
   except Exception as e: # Any exception.
     return Response("ERROR generating main.yml file: " + str(e), status_code = 500)
+
+###########################################################################
+###########################################################################
+################ ROUTES FOR LOGISTIC REGRESSION TECHNIQUE ################
+###########################################################################
+###########################################################################
+
+@app.route('/LogisticRegression/getMainCwl', methods=['GET'])
+async def LogisticRegressionGetMainCwl(request):
+  try:
+    # Workflow
+    LogisticRegression_workflow = cwlgen.workflow.Workflow(
+                      workflow_id="LogisticRegression_workflow",
+                      label="LogisticRegression_workflow",
+                      doc="Main workflow for the Logistic Regression technique",
+                      cwl_version="v1.0"
+                      )
+    # requirements
+    # - IMPORTANT: it must be a list.
+    LogisticRegression_workflow.requirements = [ cwlgen.SubworkflowFeatureRequirement() ]
+    # steps
+    step1 = cwlgen.workflow.WorkflowStep(
+                        step_id="step1",
+                        run="cwl/step1.cwl"
+                        )
+    step1.inputs.append( cwlgen.WorkflowStepInput(input_id="step1_python_file", source="step1_python_file") )
+    step1.inputs.append( cwlgen.WorkflowStepInput(input_id="step1_input_train_dataset", source="step1_input_train_dataset") )
+    step1.inputs.append( cwlgen.WorkflowStepInput(input_id="step1_input_test_dataset", source="step1_input_test_dataset") )
+    step1.out.append( cwlgen.WorkflowStepOutput(output_id="step1_output_train_dataset") )
+    step1.out.append( cwlgen.WorkflowStepOutput(output_id="step1_output_test_dataset") )
+    LogisticRegression_workflow.steps.append( step1 )
+    step2 = cwlgen.workflow.WorkflowStep(
+                        step_id="step2",
+                        run="cwl/step2.cwl"
+                        )
+    step2.inputs.append( cwlgen.WorkflowStepInput(input_id="step2_python_file", source="step2_python_file") )
+    step2.inputs.append( cwlgen.WorkflowStepInput(input_id="step2_input_train_dataset", source="step1/step1_output_train_dataset") )
+    step2.inputs.append( cwlgen.WorkflowStepInput(input_id="step2_input_test_dataset", source="step1/step1_output_test_dataset") )
+    step2.out.append( cwlgen.WorkflowStepOutput(output_id="step2_output_train_dataset_with_predictions") )
+    step2.out.append( cwlgen.WorkflowStepOutput(output_id="step2_output_test_dataset_with_predictions") )
+    step2.out.append( cwlgen.WorkflowStepOutput(output_id="step2_output_pickel_model") )
+    LogisticRegression_workflow.steps.append( step2 )
+    step3 = cwlgen.workflow.WorkflowStep(
+                        step_id="step3",
+                        run="cwl/step3.cwl"
+                        )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_python_file", source="step3_python_file") )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_input_train_dataset_with_predictions", source="step2/step2_output_train_dataset_with_predictions") )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_input_test_dataset_with_predictions", source="step2/step2_output_test_dataset_with_predictions") )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_input_pickle_model", source="step2/step2_output_pickel_model") )
+    step3.out.append( cwlgen.WorkflowStepOutput(output_id="step3_output_train_dataset_with_predictions") )
+    step3.out.append( cwlgen.WorkflowStepOutput(output_id="step3_output_test_dataset_with_predictions") )
+    step3.out.append( cwlgen.WorkflowStepOutput(output_id="step3_output_pickle_model") )
+    LogisticRegression_workflow.steps.append( step3 )
+    # inputs
+    workflow_input_step1_python_file = cwlgen.workflow.InputParameter(
+                                        param_id="step1_python_file",
+                                        label="step1_python_file",
+                                        doc="Python file corresponding to the step 1",
+                                        param_type="File"
+                                        )
+    LogisticRegression_workflow.inputs.append( workflow_input_step1_python_file )
+    workflow_input_step1_input_train_dataset = cwlgen.workflow.InputParameter(
+                                        param_id="step1_input_train_dataset",
+                                        label="step1_input_train_dataset",
+                                        doc="Train dataset corresponding to the step 1",
+                                        param_type="File"
+                                        )
+    LogisticRegression_workflow.inputs.append( workflow_input_step1_input_train_dataset )
+    workflow_input_step1_input_test_dataset = cwlgen.workflow.InputParameter(
+                                        param_id="step1_input_test_dataset",
+                                        label="step1_input_test_dataset",
+                                        doc="Test dataset corresponding to the step 1",
+                                        param_type="File"
+                                        )
+    LogisticRegression_workflow.inputs.append( workflow_input_step1_input_test_dataset )
+    workflow_input_step2_python_file = cwlgen.workflow.InputParameter(
+                                        param_id="step2_python_file",
+                                        label="step2_python_file",
+                                        doc="Python file corresponding to the step 2",
+                                        param_type="File"
+                                        )
+    LogisticRegression_workflow.inputs.append( workflow_input_step2_python_file )
+    workflow_input_step3_python_file = cwlgen.workflow.InputParameter(
+                                        param_id="step3_python_file",
+                                        label="step3_python_file",
+                                        doc="Python file corresponding to the step 3",
+                                        param_type="File"
+                                        )
+    LogisticRegression_workflow.inputs.append( workflow_input_step3_python_file )
+    # outputs
+    workflow_output = cwlgen.workflow.WorkflowOutputParameter(
+                                param_id="step3_output_train_dataset_with_predictions",
+                                output_source="step3/step3_output_train_dataset_with_predictions",
+                                label="step3_output_train_dataset_with_predictions",
+                                doc="Train dataset in CSV format with the final predictions",
+                                param_type="File"
+                                )
+    LogisticRegression_workflow.outputs.append(workflow_output)
+    workflow_output = cwlgen.workflow.WorkflowOutputParameter(
+                                param_id="step3_output_test_dataset_with_predictions",
+                                output_source="step3/step3_output_test_dataset_with_predictions",
+                                label="step3_output_test_dataset_with_predictions",
+                                doc="Test dataset in CSV format with the final predictions",
+                                param_type="File"
+                                )
+    LogisticRegression_workflow.outputs.append(workflow_output)
+    workflow_output = cwlgen.workflow.WorkflowOutputParameter(
+                                param_id="step3_output_pickle_model",
+                                output_source="step3/step3_output_pickle_model",
+                                label="step3_output_pickle_model",
+                                doc="Model in pickle format",
+                                param_type="File"
+                                )
+    LogisticRegression_workflow.outputs.append(workflow_output)
+    return PlainTextResponse(LogisticRegression_workflow.export_string())
+  except Exception as e: # Any exception.
+    return Response("ERROR generating main.cwl file: " + str(e), status_code = 500)
+
+@app.route('/LogisticRegression/generateMainYml/{train_dataset_name:str}/{test_dataset_name:str}', methods=['GET'])
+async def LogisticRegressionGenerateMainYml(request):
+  try:
+    main_yml_file_content = "step1_python_file:\n  class: File\n  path: python/step1.py\n"
+    main_yml_file_content = main_yml_file_content + "step1_input_train_dataset:\n  class: File\n  path: files/" + request.path_params['train_dataset_name'] + "\n"
+    main_yml_file_content = main_yml_file_content + "step1_input_test_dataset:\n  class: File\n  path: files/" + request.path_params['test_dataset_name'] + "\n"
+    main_yml_file_content = main_yml_file_content + "step2_python_file:\n  class: File\n  path: python/step2.py\n"
+    main_yml_file_content = main_yml_file_content + "step3_python_file:\n  class: File\n  path: python/step3.py\n"
+    return PlainTextResponse(main_yml_file_content)
+  except Exception as e: # Any exception.
+    return Response("ERROR generating main.yml file: " + str(e), status_code = 500)
