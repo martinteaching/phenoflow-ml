@@ -1,0 +1,15 @@
+step1_python_file:
+  class: File
+  path: python/step1.py
+step1_input_train_dataset:
+  class: File
+  path: files/example_train.csv
+step1_input_test_dataset:
+  class: File
+  path: files/example_test.csv
+step2_python_file:
+  class: File
+  path: python/step2.py
+step3_python_file:
+  class: File
+  path: python/step3.py

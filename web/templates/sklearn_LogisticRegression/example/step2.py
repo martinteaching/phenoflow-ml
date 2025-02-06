@@ -27,7 +27,7 @@ _default_params = {
 }
 
 # Class name.
-class_name = <CLASS_NAME>
+class_name = "class"
 att_name_for_predictions = class_name + "_pred"
 # Read the input datasets.
 train_dataset = pd.read_csv(sys.argv[1])
@@ -36,21 +36,21 @@ test_dataset = pd.read_csv(sys.argv[2])
 train_dataset_with_predictions = train_dataset.copy()
 test_dataset_with_predictions = test_dataset.copy()
 # Initial parameters.
-penalty_value = <PENALTY_PARAMETER> or _default_params["penalty"]
-dual_value = <DUAL_PARAMETER> or _default_params["dual"]
-tol_value = <TOL_PARAMETER> or _default_params["tol"]
-C_value = <C_PARAMETER> or _default_params["C"]
-fit_intercept_value = <FIT_INTERCEPT_PARAMETER> or _default_params["fit_intercept"]
-intercept_scaling_value = <INTERCEPT_SCALING_PARAMETER> or _default_params["intercept_scaling"]
-class_weight_value = <CLASS_WEIGHT_PARAMETER> or _default_params["class_weight"]
-random_state_value = <RANDOM_STATE_PARAMETER> or _default_params["random_state"]
-solver_value = <SOLVER_PARAMETER> or _default_params["solver"]
-max_iter_value = <MAX_ITER_PARAMETER> or _default_params["max_iter"]
-multi_class_value = <MULTI_CLASS_PARAMETER> or _default_params["multi_class"]
-verbose_value = <VERBOSE_PARAMETER> or _default_params["verbose"]
-warm_start_value = <WARM_START_PARAMETER> or _default_params["warm_start"]
-n_jobs_value = <N_JOBS_PARAMETER> or _default_params["n_jobs"]
-l1_ratio_value = <L1_RATIO_PARAMETER> or _default_params["l1_ratio"]
+penalty_value = None or _default_params["penalty"]
+dual_value = None or _default_params["dual"]
+tol_value = None or _default_params["tol"]
+C_value = None or _default_params["C"]
+fit_intercept_value = None or _default_params["fit_intercept"]
+intercept_scaling_value = None or _default_params["intercept_scaling"]
+class_weight_value = None or _default_params["class_weight"]
+random_state_value = None or _default_params["random_state"]
+solver_value = None or _default_params["solver"]
+max_iter_value = None or _default_params["max_iter"]
+multi_class_value = None or _default_params["multi_class"]
+verbose_value = None or _default_params["verbose"]
+warm_start_value = None or _default_params["warm_start"]
+n_jobs_value = None or _default_params["n_jobs"]
+l1_ratio_value = None or _default_params["l1_ratio"]
 # Create the model.
 model = LogisticRegression(penalty = penalty_value, dual = dual_value, tol = tol_value, C = C_value,
                            fit_intercept = fit_intercept_value, intercept_scaling = intercept_scaling_value,

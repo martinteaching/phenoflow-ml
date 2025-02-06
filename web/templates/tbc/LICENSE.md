@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2022 Antonio Lopez-Martinez-Carrasco
+Copyright (c) 2025 Antonio Lopez-Martinez-Carrasco
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
