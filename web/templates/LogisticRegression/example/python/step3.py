@@ -11,7 +11,7 @@ import pickle
 train_dataset_with_predictions = pd.read_csv(sys.argv[1])
 test_dataset_with_predictions = pd.read_csv(sys.argv[2])
 # Write the datasts.
-train_dataset_with_predictions.to_csv("name_exampple_id_1_output_train_dataset_with_predictions.csv")
+train_dataset_with_predictions.to_csv("name_example_id_1_output_train_dataset_with_predictions.csv")
 test_dataset_with_predictions.to_csv("name_example_id_1_output_test_dataset_with_predictions.csv")
 # Read the model.
 input_model_file = open(sys.argv[3], "rb")
