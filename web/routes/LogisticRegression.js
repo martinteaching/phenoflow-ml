@@ -21,7 +21,7 @@ const path = require('path');
  *     security:
  *       - bearerAuth: []
  *     summary: Create a new Logistic Regression phenotype
- *     description: Create a phenotype definition based on the Logistic Regression technique (using the scikit-learn implementation: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html).
+ *     description: Create a phenotype definition based on the Logistic Regression technique (using the scikit-learn implementation).
  *     requestBody:
  *       required: true
  *       content:
