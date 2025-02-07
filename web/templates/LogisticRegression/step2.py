@@ -19,7 +19,6 @@ _params = {
     "random_state" : None,
     "solver" : 'lbfgs',
     "max_iter" : 100,
-    "multi_class" : 'deprecated',
     "verbose" : 0,
     "warm_start" : False,
     "n_jobs" : None,
@@ -40,8 +39,8 @@ random_state_value = <RANDOM_STATE> or _params["random_state"]
 model = LogisticRegression(penalty = _params["penalty"], dual = _params["dual"], tol = _params["tol"], C = _params["C"],
                            fit_intercept = _params["fit_intercept"], intercept_scaling = _params["intercept_scaling"],
                            class_weight = _params["class_weight"], random_state = random_state_value, solver = _params["solver"],
-                           max_iter = _params["max_iter"], multi_class = _params["multi_class"], verbose = _params["verbose"],
-                           warm_start = _params["warm_start"], n_jobs = _params["n_jobs"], l1_ratio = _params["l1_ratio"])
+                           max_iter = _params["max_iter"], verbose = _params["verbose"], warm_start = _params["warm_start"],
+                           n_jobs = _params["n_jobs"], l1_ratio = _params["l1_ratio"])
 # Split the train data into X and y.
 X = train_dataset.drop(columns=[class_name], inplace=False)
 y = train_dataset[class_name]
