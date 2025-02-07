@@ -204,7 +204,14 @@ router.post('/addPhenotype', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algo
         regex = /<CLASS_NAME>|<RANDOM_STATE>|/g
         new_source_file_content = source_file_content.replaceAll(regex, (match) => {
             if (match === "<CLASS_NAME>") {
-                return req.body.class_name;
+                if (
+                    ((req.body.class_name.charAt(0) === "\"") && (req.body.class_name.charAt(req.body.class_name.length-1) === "\"")) ||
+                    ((req.body.class_name.charAt(0) === "\'") && (req.body.class_name.charAt(req.body.class_name.length-1) === "\""))
+                ) {
+                    return req.body.class_name;
+                } else {
+                    return "\"" + req.body.class_name + "\"";
+                }
             } else if (match === "<RANDOM_STATE>") {
                 return req_body_random_state
             } else {
