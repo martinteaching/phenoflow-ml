@@ -305,7 +305,7 @@ router.post('/addPhenotype', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algo
  *         required: true
  *         description: Name of the phenotype which will use the uploaded dataset
  *       - in: formData
- *         name: uploadCsvDataset
+ *         name: uploadedCsvDataset
  *         type: file
  *         required: true
  *         description: Uploaded dataset
@@ -440,9 +440,9 @@ router.get("/generate/:workflowName/:trainDatasetName/:testDatasetName", jwt({se
     }
     // Check whether the train dataset exists.
     dataset_uploads_folder_path = "uploads/" + workflow_id + "/datasets/"
-    dataset_path = dataset_uploads_folder_path + req.params.trainDatasetName
+    train_dataset_path = dataset_uploads_folder_path + req.params.trainDatasetName
     try {
-        await fs.stat(dataset_path);
+        await fs.stat(train_dataset_path);
     } catch(error) {
         error = "Error: dataset with name '" + req.params.trainDatasetName + "' does not exist in '" + dataset_uploads_folder_path + "' folder: " + error;
         logger.debug(error);
@@ -450,9 +450,9 @@ router.get("/generate/:workflowName/:trainDatasetName/:testDatasetName", jwt({se
     }
     // Check whether the test dataset exists.
     dataset_uploads_folder_path = "uploads/" + workflow_id + "/datasets/"
-    dataset_path = dataset_uploads_folder_path + req.params.testDatasetName
+    test_dataset_path = dataset_uploads_folder_path + req.params.testDatasetName
     try {
-        await fs.stat(dataset_path);
+        await fs.stat(test_dataset_path);
     } catch(error) {
         error = "Error: dataset with name '" + req.params.testDatasetName + "' does not exist in '" + dataset_uploads_folder_path + "' folder: " + error;
         logger.debug(error);
@@ -526,7 +526,7 @@ router.get("/generate/:workflowName/:trainDatasetName/:testDatasetName", jwt({se
         logger.debug(error);
         return res.status(500).send(error);
     }
-    // Copy the dataset from uploads folder.
+    // Copy the datasets from uploads folder.
     try {
         // IMPORTANT: 'files' folder will contain all files needed and generated in all steps.
         await fs.mkdir(final_output_path + "files");
@@ -536,9 +536,16 @@ router.get("/generate/:workflowName/:trainDatasetName/:testDatasetName", jwt({se
         return res.status(500).send(error);
     }
     try {
-        await fs.copyFile(dataset_path, final_output_path + 'files/' + req.params.datasetName)
+        await fs.copyFile(train_dataset_path, final_output_path + 'files/' + req.params.trainDatasetName)
     } catch(error) {
-        error = "Error copying the dataset: " + error;
+        error = "Error copying the train dataset: " + error;
+        logger.debug(error);
+        return res.status(500).send(error);
+    }
+    try {
+        await fs.copyFile(test_dataset_path, final_output_path + 'files/' + req.params.testDatasetName)
+    } catch(error) {
+        error = "Error copying the test dataset: " + error;
         logger.debug(error);
         return res.status(500).send(error);
     }
@@ -578,7 +585,7 @@ router.get("/generate/:workflowName/:trainDatasetName/:testDatasetName", jwt({se
     }
     // Call generator endpoint to generate main.yml file.
     try {
-        generator_url = config.get("generator.URL") + "/LogisticRegression/generateMainYml/" + req.params.datasetName
+        generator_url = config.get("generator.URL") + "/LogisticRegression/generateMainYml/" + req.params.trainDatasetName + "/" + req.params.testDatasetName
         main_yml_file_content = await got.get(generator_url).text();
         await fs.writeFile(final_output_path + 'main.yml', main_yml_file_content, "utf8");
     } catch(error) {
