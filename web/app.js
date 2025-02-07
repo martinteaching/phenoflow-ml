@@ -56,6 +56,7 @@ const importer = require("./routes/importer");
 const workflowUtils = require("./util/workflow");
 
 const tbc = require("./routes/tbc")
+const LogisticRegression = require("./routes/LogisticRegression")
 
 const app = express();
 app.enable('strict routing');
@@ -84,6 +85,7 @@ router.use("/importer", importer);
 router.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 router.use("/tbc", tbc)
+router.use("/LogisticRegression", LogisticRegression)
 
 app.use("/phenoflow", router);
 

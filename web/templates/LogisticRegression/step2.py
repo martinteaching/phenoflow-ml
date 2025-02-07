@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 import pickle
 
-_default_params = {
+_params = {
     "penalty" : 'l2',
     "dual" : False,
     "tol" : 0.0001,
@@ -35,28 +35,13 @@ test_dataset = pd.read_csv(sys.argv[2])
 # Create the output datasets.
 train_dataset_with_predictions = train_dataset.copy()
 test_dataset_with_predictions = test_dataset.copy()
-# Initial parameters.
-penalty_value = <PENALTY_PARAMETER> or _default_params["penalty"]
-dual_value = <DUAL_PARAMETER> or _default_params["dual"]
-tol_value = <TOL_PARAMETER> or _default_params["tol"]
-C_value = <C_PARAMETER> or _default_params["C"]
-fit_intercept_value = <FIT_INTERCEPT_PARAMETER> or _default_params["fit_intercept"]
-intercept_scaling_value = <INTERCEPT_SCALING_PARAMETER> or _default_params["intercept_scaling"]
-class_weight_value = <CLASS_WEIGHT_PARAMETER> or _default_params["class_weight"]
-random_state_value = <RANDOM_STATE_PARAMETER> or _default_params["random_state"]
-solver_value = <SOLVER_PARAMETER> or _default_params["solver"]
-max_iter_value = <MAX_ITER_PARAMETER> or _default_params["max_iter"]
-multi_class_value = <MULTI_CLASS_PARAMETER> or _default_params["multi_class"]
-verbose_value = <VERBOSE_PARAMETER> or _default_params["verbose"]
-warm_start_value = <WARM_START_PARAMETER> or _default_params["warm_start"]
-n_jobs_value = <N_JOBS_PARAMETER> or _default_params["n_jobs"]
-l1_ratio_value = <L1_RATIO_PARAMETER> or _default_params["l1_ratio"]
 # Create the model.
-model = LogisticRegression(penalty = penalty_value, dual = dual_value, tol = tol_value, C = C_value,
-                           fit_intercept = fit_intercept_value, intercept_scaling = intercept_scaling_value,
-                           class_weight = class_weight_value, random_state = random_state_value,
-                           solver = solver_value, max_iter = max_iter_value, multi_class = multi_class_value,
-                           verbose = verbose_value, warm_start = warm_start_value, n_jobs = n_jobs_value, l1_ratio = l1_ratio_value)
+random_state_value = <RANDOM_STATE> or _params["random_state"]
+model = LogisticRegression(penalty = _params["penalty"], dual = _params["dual"], tol = _params["tol"], C = _params["C"],
+                           fit_intercept = _params["fit_intercept"], intercept_scaling = _params["intercept_scaling"],
+                           class_weight = _params["class_weight"], random_state = random_state_value, solver = _params["solver"],
+                           max_iter = _params["max_iter"], multi_class = _params["multi_class"], verbose = _params["verbose"],
+                           warm_start = _params["warm_start"], n_jobs = _params["n_jobs"], l1_ratio = _params["l1_ratio"])
 # Split the train data into X and y.
 X = train_dataset.drop(columns=[class_name], inplace=False)
 y = train_dataset[class_name]

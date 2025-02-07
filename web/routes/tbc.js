@@ -549,7 +549,7 @@ const path = require('path');
 
 /**
  * @swagger
- * /phenoflow/tbc/generate/{workflowName}/{datasetName}:
+ * /phenoflow/tbc/generate2/{workflowName}/{datasetName}:
  *   get:
  *     summary: Generate a Trace-based clustering phenotype
  *     description: Generate a phenotype based on the Trace-based clustering technique, indicanting and existing workflow/phenotype name and an existing dataset name (including its extension)
@@ -570,7 +570,7 @@ const path = require('path');
  *       500:
  *         description: Some error occurred
  */
-router.get("/generate/:workflowName/:datasetName", jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algorithms:['RS256']}), async function(req, res, next) {
+router.get("/generate2/:workflowName/:datasetName", jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algorithms:['RS256']}), async function(req, res, next) {
     if ( !req.params.workflowName || !req.params.datasetName ) {
         return res.status(500).send("Missing parameters (see documentation).")
     }
@@ -760,7 +760,7 @@ router.get("/generate/:workflowName/:datasetName", jwt({secret:config.get("jwt.R
  *       500:
  *         description: Some error occurred
  */
- router.get("/generate2/:workflowName/:datasetName", jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algorithms:['RS256']}), async function(req, res, next) {
+ router.get("/generate/:workflowName/:datasetName", jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algorithms:['RS256']}), async function(req, res, next) {
     if ( !req.params.workflowName || !req.params.datasetName ) {
         return res.status(500).send("Missing parameters (see documentation).")
     }
