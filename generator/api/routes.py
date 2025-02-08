@@ -608,3 +608,933 @@ async def LogisticRegressionGenerateMainYml(request):
     return PlainTextResponse(main_yml_file_content)
   except Exception as e: # Any exception.
     return Response("ERROR generating main.yml file: " + str(e), status_code = 500)
+  
+###################################################################################
+###################################################################################
+################ ROUTES FOR GRADIENT BOOSTING CLASSIFIER TECHNIQUE ################
+###################################################################################
+###################################################################################
+
+@app.route('/GradientBoostingClassifier/getStepCwl/{step_number:int}', methods=['GET'])
+async def GradientBoostingClassifierGetStepCwl(request):
+  # step_number must be between 1 and 3 (both included).
+  step_number_param = request.path_params['step_number']
+  if (step_number_param < 1) or (step_number_param > 3):
+    return Response("ERROR: the 'step_number' parameter must be an integer between 1 and 3 (both included).", status_code = 500)
+  try:
+    # CommandLineTool
+    step = cwlgen.CommandLineTool(
+                  tool_id='step' + str(step_number_param),
+                  base_command='python',
+                  label="step" + str(step_number_param),
+                  doc="CWL file to automatically run the step " + str(step_number_param),
+                  cwl_version="v1.0"
+                  )
+    # namespaces
+    step_namespace = cwlgen.Namespaces()
+    step_namespace.name = "$namespaces"
+    step_namespace.s = "http://phenomics.kcl.ac.uk/phenoflow/"
+    step.namespaces = step_namespace
+    # requirements
+    # - IMPORTANT: it must be a list.
+    step.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
+    # metadata
+    if (step_number_param == 1):
+      metadata = {'type' : 'load'}
+    elif (step_number_param == 2):
+      metadata = {'type' : 'logic'}
+    elif (step_number_param == 3):
+      metadata = {'type' : 'output'}
+    else:
+      # We checked at the beginning that 'step_number_param' parameter is ok. This should never happen.
+      return Response("CRITICAL ERROR (metadata): this should never happen.", status_code = 500)
+    step.metadata = cwlgen.Metadata(**metadata)
+    # inputs
+    step_python_file = cwlgen.CommandInputParameter(
+                              param_id='step' + str(step_number_param) + '_python_file',
+                              label='step' + str(step_number_param) + '_python_file',
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=1),
+                              doc='Python file corresponding to the step ' + str(step_number_param)
+                              )
+    step.inputs.append(step_python_file)
+    if (step_number_param == 1):
+      step_input_train_dataset = cwlgen.CommandInputParameter(
+                              param_id="step1_input_train_dataset",
+                              label="step1_input_train_dataset",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=2),
+                              doc="Input train dataset corresponding to the step 1"
+                              )
+      step.inputs.append(step_input_train_dataset)
+      step_input_test_dataset = cwlgen.CommandInputParameter(
+                              param_id="step1_input_test_dataset",
+                              label="step1_input_test_dataset",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=3),
+                              doc="Input test dataset corresponding to the step 1"
+                              )
+      step.inputs.append(step_input_test_dataset)
+    elif (step_number_param == 2):
+      step_input_train_dataset = cwlgen.CommandInputParameter(
+                              param_id="step2_input_train_dataset",
+                              label="step2_input_train_dataset",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=2),
+                              doc="Input train dataset corresponding to the step 2"
+                              )
+      step.inputs.append(step_input_train_dataset)
+      step_input_test_dataset = cwlgen.CommandInputParameter(
+                              param_id="step2_input_test_dataset",
+                              label="step2_input_test_dataset",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=3),
+                              doc="Input test dataset corresponding to the step 2"
+                              )
+      step.inputs.append(step_input_test_dataset)
+    elif (step_number_param == 3):
+      step_input_train_dataset = cwlgen.CommandInputParameter(
+                              param_id="step3_input_train_dataset_with_predictions",
+                              label="step3_input_train_dataset_with_predictions",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=2),
+                              doc="Input train dataset corresponding to the step 3 (with predictions)"
+                              )
+      step.inputs.append(step_input_train_dataset)
+      step_input_test_dataset = cwlgen.CommandInputParameter(
+                              param_id="step3_input_test_dataset_with_predictions",
+                              label="step3_input_test_dataset_with_predictions",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=3),
+                              doc="Input test dataset corresponding to the step 3 (with predictions)"
+                              )
+      step.inputs.append(step_input_test_dataset)
+      step_input_model = cwlgen.CommandInputParameter(
+                              param_id="step3_input_pickle_model",
+                              label="step3_input_pickle_model",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=4),
+                              doc="Model in pickle format"
+                              )
+      step.inputs.append(step_input_model)
+    else:
+      # We checked at the beginning that 'step_number_param' parameter is ok. This should never happen.
+      return Response("CRITICAL ERROR (step_inputs): this should never happen.", status_code = 500)
+    # outputs
+    if (step_number_param == 1):
+      step_output_train_data = cwlgen.CommandOutputParameter(
+                                param_id="step1_output_train_dataset",
+                                label="step1_output_train_dataset",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*_train_dataset.csv"),
+                                doc="Output train dataset corresponding to the step 1"
+                                )
+      step.outputs.append(step_output_train_data)
+      step_output_test_data = cwlgen.CommandOutputParameter(
+                                param_id="step1_output_test_dataset",
+                                label="step1_output_test_dataset",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*_test_dataset.csv"),
+                                doc="Output test dataset corresponding to the step 1"
+                                )
+      step.outputs.append(step_output_test_data)
+    elif (step_number_param == 2):
+      step_output_train_data = cwlgen.CommandOutputParameter(
+                                param_id="step2_output_train_dataset_with_predictions",
+                                label="step2_output_train_dataset_with_predictions",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="step2_train_dataset_with_predictions.csv"),
+                                doc="Output train dataset corresponding to the step 2 (with predictions)"
+                                )
+      step.outputs.append(step_output_train_data)
+      step_output_test_data = cwlgen.CommandOutputParameter(
+                                param_id="step2_output_test_dataset_with_predictions",
+                                label="step2_output_test_dataset_with_predictions",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="step2_test_dataset_with_predictions.csv"),
+                                doc="Output test dataset corresponding to the step 2 (with predictions)"
+                                )
+      step.outputs.append(step_output_test_data)
+      step_output_model = cwlgen.CommandOutputParameter(
+                                param_id="step2_output_pickel_model",
+                                label="step2_output_pickel_model",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="step2_model.pickle"),
+                                doc="Model in pickle format"
+                                )
+      step.outputs.append(step_output_model)
+    elif (step_number_param == 3):
+      step_output_train_data = cwlgen.CommandOutputParameter(
+                                param_id="step3_output_train_dataset_with_predictions",
+                                label="step3_output_train_dataset_with_predictions",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*_output_train_dataset_with_predictions.csv"),
+                                doc="Train dataset in CSV format with the final predictions"
+                                )
+      step.outputs.append(step_output_train_data)
+      step_output_test_data = cwlgen.CommandOutputParameter(
+                                param_id="step3_output_test_dataset_with_predictions",
+                                label="step3_output_test_dataset_with_predictions",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*_output_test_dataset_with_predictions.csv"),
+                                doc="Test dataset in CSV format with the final predictions"
+                                )
+      step.outputs.append(step_output_test_data)
+      step_output_model = cwlgen.CommandOutputParameter(
+                                param_id="step3_output_pickle_model",
+                                label="step3_output_pickle_model",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*.pickle"),
+                                doc="Model in pickle format"
+                                )
+      step.outputs.append(step_output_model)
+    else:
+      # We checked at the beginning that 'step_number_param' parameter is ok. This should never happen.
+      return Response("CRITICAL ERROR (step_output): this should never happen.", status_code = 500)
+    return PlainTextResponse(step.export_string())
+  except Exception as e:
+    return Response("ERROR generating step" + str(step_number_param) + ".cwl file: " + str(e), status_code = 500)
+
+@app.route('/GradientBoostingClassifier/getMainCwl', methods=['GET'])
+async def GradientBoostingClassifierGetMainCwl(request):
+  try:
+    # Workflow
+    workflow_object = cwlgen.workflow.Workflow(
+                      workflow_id="GradientBoostingClassifier_workflow",
+                      label="GradientBoostingClassifier_workflow",
+                      doc="Main workflow for the Gradient Boosting Classifier technique",
+                      cwl_version="v1.0"
+                      )
+    # requirements
+    # - IMPORTANT: it must be a list.
+    workflow_object.requirements = [ cwlgen.SubworkflowFeatureRequirement() ]
+    # steps
+    step1 = cwlgen.workflow.WorkflowStep(
+                        step_id="step1",
+                        run="cwl/step1.cwl"
+                        )
+    step1.inputs.append( cwlgen.WorkflowStepInput(input_id="step1_python_file", source="step1_python_file") )
+    step1.inputs.append( cwlgen.WorkflowStepInput(input_id="step1_input_train_dataset", source="step1_input_train_dataset") )
+    step1.inputs.append( cwlgen.WorkflowStepInput(input_id="step1_input_test_dataset", source="step1_input_test_dataset") )
+    step1.out.append( cwlgen.WorkflowStepOutput(output_id="step1_output_train_dataset") )
+    step1.out.append( cwlgen.WorkflowStepOutput(output_id="step1_output_test_dataset") )
+    workflow_object.steps.append( step1 )
+    step2 = cwlgen.workflow.WorkflowStep(
+                        step_id="step2",
+                        run="cwl/step2.cwl"
+                        )
+    step2.inputs.append( cwlgen.WorkflowStepInput(input_id="step2_python_file", source="step2_python_file") )
+    step2.inputs.append( cwlgen.WorkflowStepInput(input_id="step2_input_train_dataset", source="step1/step1_output_train_dataset") )
+    step2.inputs.append( cwlgen.WorkflowStepInput(input_id="step2_input_test_dataset", source="step1/step1_output_test_dataset") )
+    step2.out.append( cwlgen.WorkflowStepOutput(output_id="step2_output_train_dataset_with_predictions") )
+    step2.out.append( cwlgen.WorkflowStepOutput(output_id="step2_output_test_dataset_with_predictions") )
+    step2.out.append( cwlgen.WorkflowStepOutput(output_id="step2_output_pickel_model") )
+    workflow_object.steps.append( step2 )
+    step3 = cwlgen.workflow.WorkflowStep(
+                        step_id="step3",
+                        run="cwl/step3.cwl"
+                        )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_python_file", source="step3_python_file") )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_input_train_dataset_with_predictions", source="step2/step2_output_train_dataset_with_predictions") )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_input_test_dataset_with_predictions", source="step2/step2_output_test_dataset_with_predictions") )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_input_pickle_model", source="step2/step2_output_pickel_model") )
+    step3.out.append( cwlgen.WorkflowStepOutput(output_id="step3_output_train_dataset_with_predictions") )
+    step3.out.append( cwlgen.WorkflowStepOutput(output_id="step3_output_test_dataset_with_predictions") )
+    step3.out.append( cwlgen.WorkflowStepOutput(output_id="step3_output_pickle_model") )
+    workflow_object.steps.append( step3 )
+    # inputs
+    workflow_input_step1_python_file = cwlgen.workflow.InputParameter(
+                                        param_id="step1_python_file",
+                                        label="step1_python_file",
+                                        doc="Python file corresponding to the step 1",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step1_python_file )
+    workflow_input_step1_input_train_dataset = cwlgen.workflow.InputParameter(
+                                        param_id="step1_input_train_dataset",
+                                        label="step1_input_train_dataset",
+                                        doc="Train dataset corresponding to the step 1",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step1_input_train_dataset )
+    workflow_input_step1_input_test_dataset = cwlgen.workflow.InputParameter(
+                                        param_id="step1_input_test_dataset",
+                                        label="step1_input_test_dataset",
+                                        doc="Test dataset corresponding to the step 1",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step1_input_test_dataset )
+    workflow_input_step2_python_file = cwlgen.workflow.InputParameter(
+                                        param_id="step2_python_file",
+                                        label="step2_python_file",
+                                        doc="Python file corresponding to the step 2",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step2_python_file )
+    workflow_input_step3_python_file = cwlgen.workflow.InputParameter(
+                                        param_id="step3_python_file",
+                                        label="step3_python_file",
+                                        doc="Python file corresponding to the step 3",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step3_python_file )
+    # outputs
+    workflow_output = cwlgen.workflow.WorkflowOutputParameter(
+                                param_id="step3_output_train_dataset_with_predictions",
+                                output_source="step3/step3_output_train_dataset_with_predictions",
+                                label="step3_output_train_dataset_with_predictions",
+                                doc="Train dataset in CSV format with the final predictions",
+                                param_type="File"
+                                )
+    workflow_object.outputs.append(workflow_output)
+    workflow_output = cwlgen.workflow.WorkflowOutputParameter(
+                                param_id="step3_output_test_dataset_with_predictions",
+                                output_source="step3/step3_output_test_dataset_with_predictions",
+                                label="step3_output_test_dataset_with_predictions",
+                                doc="Test dataset in CSV format with the final predictions",
+                                param_type="File"
+                                )
+    workflow_object.outputs.append(workflow_output)
+    workflow_output = cwlgen.workflow.WorkflowOutputParameter(
+                                param_id="step3_output_pickle_model",
+                                output_source="step3/step3_output_pickle_model",
+                                label="step3_output_pickle_model",
+                                doc="Model in pickle format",
+                                param_type="File"
+                                )
+    workflow_object.outputs.append(workflow_output)
+    return PlainTextResponse(workflow_object.export_string())
+  except Exception as e: # Any exception.
+    return Response("ERROR generating main.cwl file: " + str(e), status_code = 500)
+
+@app.route('/GradientBoostingClassifier/generateMainYml/{train_dataset_name:str}/{test_dataset_name:str}', methods=['GET'])
+async def GradientBoostingClassifierGenerateMainYml(request):
+  try:
+    main_yml_file_content = "step1_python_file:\n  class: File\n  path: python/step1.py\n"
+    main_yml_file_content = main_yml_file_content + "step1_input_train_dataset:\n  class: File\n  path: files/" + request.path_params['train_dataset_name'] + "\n"
+    main_yml_file_content = main_yml_file_content + "step1_input_test_dataset:\n  class: File\n  path: files/" + request.path_params['test_dataset_name'] + "\n"
+    main_yml_file_content = main_yml_file_content + "step2_python_file:\n  class: File\n  path: python/step2.py\n"
+    main_yml_file_content = main_yml_file_content + "step3_python_file:\n  class: File\n  path: python/step3.py\n"
+    return PlainTextResponse(main_yml_file_content)
+  except Exception as e: # Any exception.
+    return Response("ERROR generating main.yml file: " + str(e), status_code = 500)
+
+###############################################################################
+###############################################################################
+################ ROUTES FOR RANDOM FOREST CLASSIFIER TECHNIQUE ################
+###############################################################################
+###############################################################################
+
+@app.route('/RandomForestClassifier/getStepCwl/{step_number:int}', methods=['GET'])
+async def RandomForestClassifierGetStepCwl(request):
+  # step_number must be between 1 and 3 (both included).
+  step_number_param = request.path_params['step_number']
+  if (step_number_param < 1) or (step_number_param > 3):
+    return Response("ERROR: the 'step_number' parameter must be an integer between 1 and 3 (both included).", status_code = 500)
+  try:
+    # CommandLineTool
+    step = cwlgen.CommandLineTool(
+                  tool_id='step' + str(step_number_param),
+                  base_command='python',
+                  label="step" + str(step_number_param),
+                  doc="CWL file to automatically run the step " + str(step_number_param),
+                  cwl_version="v1.0"
+                  )
+    # namespaces
+    step_namespace = cwlgen.Namespaces()
+    step_namespace.name = "$namespaces"
+    step_namespace.s = "http://phenomics.kcl.ac.uk/phenoflow/"
+    step.namespaces = step_namespace
+    # requirements
+    # - IMPORTANT: it must be a list.
+    step.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
+    # metadata
+    if (step_number_param == 1):
+      metadata = {'type' : 'load'}
+    elif (step_number_param == 2):
+      metadata = {'type' : 'logic'}
+    elif (step_number_param == 3):
+      metadata = {'type' : 'output'}
+    else:
+      # We checked at the beginning that 'step_number_param' parameter is ok. This should never happen.
+      return Response("CRITICAL ERROR (metadata): this should never happen.", status_code = 500)
+    step.metadata = cwlgen.Metadata(**metadata)
+    # inputs
+    step_python_file = cwlgen.CommandInputParameter(
+                              param_id='step' + str(step_number_param) + '_python_file',
+                              label='step' + str(step_number_param) + '_python_file',
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=1),
+                              doc='Python file corresponding to the step ' + str(step_number_param)
+                              )
+    step.inputs.append(step_python_file)
+    if (step_number_param == 1):
+      step_input_train_dataset = cwlgen.CommandInputParameter(
+                              param_id="step1_input_train_dataset",
+                              label="step1_input_train_dataset",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=2),
+                              doc="Input train dataset corresponding to the step 1"
+                              )
+      step.inputs.append(step_input_train_dataset)
+      step_input_test_dataset = cwlgen.CommandInputParameter(
+                              param_id="step1_input_test_dataset",
+                              label="step1_input_test_dataset",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=3),
+                              doc="Input test dataset corresponding to the step 1"
+                              )
+      step.inputs.append(step_input_test_dataset)
+    elif (step_number_param == 2):
+      step_input_train_dataset = cwlgen.CommandInputParameter(
+                              param_id="step2_input_train_dataset",
+                              label="step2_input_train_dataset",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=2),
+                              doc="Input train dataset corresponding to the step 2"
+                              )
+      step.inputs.append(step_input_train_dataset)
+      step_input_test_dataset = cwlgen.CommandInputParameter(
+                              param_id="step2_input_test_dataset",
+                              label="step2_input_test_dataset",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=3),
+                              doc="Input test dataset corresponding to the step 2"
+                              )
+      step.inputs.append(step_input_test_dataset)
+    elif (step_number_param == 3):
+      step_input_train_dataset = cwlgen.CommandInputParameter(
+                              param_id="step3_input_train_dataset_with_predictions",
+                              label="step3_input_train_dataset_with_predictions",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=2),
+                              doc="Input train dataset corresponding to the step 3 (with predictions)"
+                              )
+      step.inputs.append(step_input_train_dataset)
+      step_input_test_dataset = cwlgen.CommandInputParameter(
+                              param_id="step3_input_test_dataset_with_predictions",
+                              label="step3_input_test_dataset_with_predictions",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=3),
+                              doc="Input test dataset corresponding to the step 3 (with predictions)"
+                              )
+      step.inputs.append(step_input_test_dataset)
+      step_input_model = cwlgen.CommandInputParameter(
+                              param_id="step3_input_pickle_model",
+                              label="step3_input_pickle_model",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=4),
+                              doc="Model in pickle format"
+                              )
+      step.inputs.append(step_input_model)
+    else:
+      # We checked at the beginning that 'step_number_param' parameter is ok. This should never happen.
+      return Response("CRITICAL ERROR (step_inputs): this should never happen.", status_code = 500)
+    # outputs
+    if (step_number_param == 1):
+      step_output_train_data = cwlgen.CommandOutputParameter(
+                                param_id="step1_output_train_dataset",
+                                label="step1_output_train_dataset",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*_train_dataset.csv"),
+                                doc="Output train dataset corresponding to the step 1"
+                                )
+      step.outputs.append(step_output_train_data)
+      step_output_test_data = cwlgen.CommandOutputParameter(
+                                param_id="step1_output_test_dataset",
+                                label="step1_output_test_dataset",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*_test_dataset.csv"),
+                                doc="Output test dataset corresponding to the step 1"
+                                )
+      step.outputs.append(step_output_test_data)
+    elif (step_number_param == 2):
+      step_output_train_data = cwlgen.CommandOutputParameter(
+                                param_id="step2_output_train_dataset_with_predictions",
+                                label="step2_output_train_dataset_with_predictions",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="step2_train_dataset_with_predictions.csv"),
+                                doc="Output train dataset corresponding to the step 2 (with predictions)"
+                                )
+      step.outputs.append(step_output_train_data)
+      step_output_test_data = cwlgen.CommandOutputParameter(
+                                param_id="step2_output_test_dataset_with_predictions",
+                                label="step2_output_test_dataset_with_predictions",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="step2_test_dataset_with_predictions.csv"),
+                                doc="Output test dataset corresponding to the step 2 (with predictions)"
+                                )
+      step.outputs.append(step_output_test_data)
+      step_output_model = cwlgen.CommandOutputParameter(
+                                param_id="step2_output_pickel_model",
+                                label="step2_output_pickel_model",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="step2_model.pickle"),
+                                doc="Model in pickle format"
+                                )
+      step.outputs.append(step_output_model)
+    elif (step_number_param == 3):
+      step_output_train_data = cwlgen.CommandOutputParameter(
+                                param_id="step3_output_train_dataset_with_predictions",
+                                label="step3_output_train_dataset_with_predictions",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*_output_train_dataset_with_predictions.csv"),
+                                doc="Train dataset in CSV format with the final predictions"
+                                )
+      step.outputs.append(step_output_train_data)
+      step_output_test_data = cwlgen.CommandOutputParameter(
+                                param_id="step3_output_test_dataset_with_predictions",
+                                label="step3_output_test_dataset_with_predictions",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*_output_test_dataset_with_predictions.csv"),
+                                doc="Test dataset in CSV format with the final predictions"
+                                )
+      step.outputs.append(step_output_test_data)
+      step_output_model = cwlgen.CommandOutputParameter(
+                                param_id="step3_output_pickle_model",
+                                label="step3_output_pickle_model",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*.pickle"),
+                                doc="Model in pickle format"
+                                )
+      step.outputs.append(step_output_model)
+    else:
+      # We checked at the beginning that 'step_number_param' parameter is ok. This should never happen.
+      return Response("CRITICAL ERROR (step_output): this should never happen.", status_code = 500)
+    return PlainTextResponse(step.export_string())
+  except Exception as e:
+    return Response("ERROR generating step" + str(step_number_param) + ".cwl file: " + str(e), status_code = 500)
+
+@app.route('/RandomForestClassifier/getMainCwl', methods=['GET'])
+async def RandomForestClassifierGetMainCwl(request):
+  try:
+    # Workflow
+    workflow_object = cwlgen.workflow.Workflow(
+                      workflow_id="RandomForestClassifier_workflow",
+                      label="RandomForestClassifier_workflow",
+                      doc="Main workflow for the Random Forest Classifier technique",
+                      cwl_version="v1.0"
+                      )
+    # requirements
+    # - IMPORTANT: it must be a list.
+    workflow_object.requirements = [ cwlgen.SubworkflowFeatureRequirement() ]
+    # steps
+    step1 = cwlgen.workflow.WorkflowStep(
+                        step_id="step1",
+                        run="cwl/step1.cwl"
+                        )
+    step1.inputs.append( cwlgen.WorkflowStepInput(input_id="step1_python_file", source="step1_python_file") )
+    step1.inputs.append( cwlgen.WorkflowStepInput(input_id="step1_input_train_dataset", source="step1_input_train_dataset") )
+    step1.inputs.append( cwlgen.WorkflowStepInput(input_id="step1_input_test_dataset", source="step1_input_test_dataset") )
+    step1.out.append( cwlgen.WorkflowStepOutput(output_id="step1_output_train_dataset") )
+    step1.out.append( cwlgen.WorkflowStepOutput(output_id="step1_output_test_dataset") )
+    workflow_object.steps.append( step1 )
+    step2 = cwlgen.workflow.WorkflowStep(
+                        step_id="step2",
+                        run="cwl/step2.cwl"
+                        )
+    step2.inputs.append( cwlgen.WorkflowStepInput(input_id="step2_python_file", source="step2_python_file") )
+    step2.inputs.append( cwlgen.WorkflowStepInput(input_id="step2_input_train_dataset", source="step1/step1_output_train_dataset") )
+    step2.inputs.append( cwlgen.WorkflowStepInput(input_id="step2_input_test_dataset", source="step1/step1_output_test_dataset") )
+    step2.out.append( cwlgen.WorkflowStepOutput(output_id="step2_output_train_dataset_with_predictions") )
+    step2.out.append( cwlgen.WorkflowStepOutput(output_id="step2_output_test_dataset_with_predictions") )
+    step2.out.append( cwlgen.WorkflowStepOutput(output_id="step2_output_pickel_model") )
+    workflow_object.steps.append( step2 )
+    step3 = cwlgen.workflow.WorkflowStep(
+                        step_id="step3",
+                        run="cwl/step3.cwl"
+                        )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_python_file", source="step3_python_file") )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_input_train_dataset_with_predictions", source="step2/step2_output_train_dataset_with_predictions") )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_input_test_dataset_with_predictions", source="step2/step2_output_test_dataset_with_predictions") )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_input_pickle_model", source="step2/step2_output_pickel_model") )
+    step3.out.append( cwlgen.WorkflowStepOutput(output_id="step3_output_train_dataset_with_predictions") )
+    step3.out.append( cwlgen.WorkflowStepOutput(output_id="step3_output_test_dataset_with_predictions") )
+    step3.out.append( cwlgen.WorkflowStepOutput(output_id="step3_output_pickle_model") )
+    workflow_object.steps.append( step3 )
+    # inputs
+    workflow_input_step1_python_file = cwlgen.workflow.InputParameter(
+                                        param_id="step1_python_file",
+                                        label="step1_python_file",
+                                        doc="Python file corresponding to the step 1",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step1_python_file )
+    workflow_input_step1_input_train_dataset = cwlgen.workflow.InputParameter(
+                                        param_id="step1_input_train_dataset",
+                                        label="step1_input_train_dataset",
+                                        doc="Train dataset corresponding to the step 1",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step1_input_train_dataset )
+    workflow_input_step1_input_test_dataset = cwlgen.workflow.InputParameter(
+                                        param_id="step1_input_test_dataset",
+                                        label="step1_input_test_dataset",
+                                        doc="Test dataset corresponding to the step 1",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step1_input_test_dataset )
+    workflow_input_step2_python_file = cwlgen.workflow.InputParameter(
+                                        param_id="step2_python_file",
+                                        label="step2_python_file",
+                                        doc="Python file corresponding to the step 2",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step2_python_file )
+    workflow_input_step3_python_file = cwlgen.workflow.InputParameter(
+                                        param_id="step3_python_file",
+                                        label="step3_python_file",
+                                        doc="Python file corresponding to the step 3",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step3_python_file )
+    # outputs
+    workflow_output = cwlgen.workflow.WorkflowOutputParameter(
+                                param_id="step3_output_train_dataset_with_predictions",
+                                output_source="step3/step3_output_train_dataset_with_predictions",
+                                label="step3_output_train_dataset_with_predictions",
+                                doc="Train dataset in CSV format with the final predictions",
+                                param_type="File"
+                                )
+    workflow_object.outputs.append(workflow_output)
+    workflow_output = cwlgen.workflow.WorkflowOutputParameter(
+                                param_id="step3_output_test_dataset_with_predictions",
+                                output_source="step3/step3_output_test_dataset_with_predictions",
+                                label="step3_output_test_dataset_with_predictions",
+                                doc="Test dataset in CSV format with the final predictions",
+                                param_type="File"
+                                )
+    workflow_object.outputs.append(workflow_output)
+    workflow_output = cwlgen.workflow.WorkflowOutputParameter(
+                                param_id="step3_output_pickle_model",
+                                output_source="step3/step3_output_pickle_model",
+                                label="step3_output_pickle_model",
+                                doc="Model in pickle format",
+                                param_type="File"
+                                )
+    workflow_object.outputs.append(workflow_output)
+    return PlainTextResponse(workflow_object.export_string())
+  except Exception as e: # Any exception.
+    return Response("ERROR generating main.cwl file: " + str(e), status_code = 500)
+
+@app.route('/RandomForestClassifier/generateMainYml/{train_dataset_name:str}/{test_dataset_name:str}', methods=['GET'])
+async def RandomForestClassifierGenerateMainYml(request):
+  try:
+    main_yml_file_content = "step1_python_file:\n  class: File\n  path: python/step1.py\n"
+    main_yml_file_content = main_yml_file_content + "step1_input_train_dataset:\n  class: File\n  path: files/" + request.path_params['train_dataset_name'] + "\n"
+    main_yml_file_content = main_yml_file_content + "step1_input_test_dataset:\n  class: File\n  path: files/" + request.path_params['test_dataset_name'] + "\n"
+    main_yml_file_content = main_yml_file_content + "step2_python_file:\n  class: File\n  path: python/step2.py\n"
+    main_yml_file_content = main_yml_file_content + "step3_python_file:\n  class: File\n  path: python/step3.py\n"
+    return PlainTextResponse(main_yml_file_content)
+  except Exception as e: # Any exception.
+    return Response("ERROR generating main.yml file: " + str(e), status_code = 500)
+  
+####################################################################################
+####################################################################################
+################ ROUTES FOR SUPPORT VECTOR CLASSIFICATION TECHNIQUE ################
+####################################################################################
+####################################################################################
+
+@app.route('/SVC/getStepCwl/{step_number:int}', methods=['GET'])
+async def SVCGetStepCwl(request):
+  # step_number must be between 1 and 3 (both included).
+  step_number_param = request.path_params['step_number']
+  if (step_number_param < 1) or (step_number_param > 3):
+    return Response("ERROR: the 'step_number' parameter must be an integer between 1 and 3 (both included).", status_code = 500)
+  try:
+    # CommandLineTool
+    step = cwlgen.CommandLineTool(
+                  tool_id='step' + str(step_number_param),
+                  base_command='python',
+                  label="step" + str(step_number_param),
+                  doc="CWL file to automatically run the step " + str(step_number_param),
+                  cwl_version="v1.0"
+                  )
+    # namespaces
+    step_namespace = cwlgen.Namespaces()
+    step_namespace.name = "$namespaces"
+    step_namespace.s = "http://phenomics.kcl.ac.uk/phenoflow/"
+    step.namespaces = step_namespace
+    # requirements
+    # - IMPORTANT: it must be a list.
+    step.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
+    # metadata
+    if (step_number_param == 1):
+      metadata = {'type' : 'load'}
+    elif (step_number_param == 2):
+      metadata = {'type' : 'logic'}
+    elif (step_number_param == 3):
+      metadata = {'type' : 'output'}
+    else:
+      # We checked at the beginning that 'step_number_param' parameter is ok. This should never happen.
+      return Response("CRITICAL ERROR (metadata): this should never happen.", status_code = 500)
+    step.metadata = cwlgen.Metadata(**metadata)
+    # inputs
+    step_python_file = cwlgen.CommandInputParameter(
+                              param_id='step' + str(step_number_param) + '_python_file',
+                              label='step' + str(step_number_param) + '_python_file',
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=1),
+                              doc='Python file corresponding to the step ' + str(step_number_param)
+                              )
+    step.inputs.append(step_python_file)
+    if (step_number_param == 1):
+      step_input_train_dataset = cwlgen.CommandInputParameter(
+                              param_id="step1_input_train_dataset",
+                              label="step1_input_train_dataset",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=2),
+                              doc="Input train dataset corresponding to the step 1"
+                              )
+      step.inputs.append(step_input_train_dataset)
+      step_input_test_dataset = cwlgen.CommandInputParameter(
+                              param_id="step1_input_test_dataset",
+                              label="step1_input_test_dataset",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=3),
+                              doc="Input test dataset corresponding to the step 1"
+                              )
+      step.inputs.append(step_input_test_dataset)
+    elif (step_number_param == 2):
+      step_input_train_dataset = cwlgen.CommandInputParameter(
+                              param_id="step2_input_train_dataset",
+                              label="step2_input_train_dataset",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=2),
+                              doc="Input train dataset corresponding to the step 2"
+                              )
+      step.inputs.append(step_input_train_dataset)
+      step_input_test_dataset = cwlgen.CommandInputParameter(
+                              param_id="step2_input_test_dataset",
+                              label="step2_input_test_dataset",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=3),
+                              doc="Input test dataset corresponding to the step 2"
+                              )
+      step.inputs.append(step_input_test_dataset)
+    elif (step_number_param == 3):
+      step_input_train_dataset = cwlgen.CommandInputParameter(
+                              param_id="step3_input_train_dataset_with_predictions",
+                              label="step3_input_train_dataset_with_predictions",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=2),
+                              doc="Input train dataset corresponding to the step 3 (with predictions)"
+                              )
+      step.inputs.append(step_input_train_dataset)
+      step_input_test_dataset = cwlgen.CommandInputParameter(
+                              param_id="step3_input_test_dataset_with_predictions",
+                              label="step3_input_test_dataset_with_predictions",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=3),
+                              doc="Input test dataset corresponding to the step 3 (with predictions)"
+                              )
+      step.inputs.append(step_input_test_dataset)
+      step_input_model = cwlgen.CommandInputParameter(
+                              param_id="step3_input_pickle_model",
+                              label="step3_input_pickle_model",
+                              param_type='File',
+                              input_binding=cwlgen.CommandLineBinding(position=4),
+                              doc="Model in pickle format"
+                              )
+      step.inputs.append(step_input_model)
+    else:
+      # We checked at the beginning that 'step_number_param' parameter is ok. This should never happen.
+      return Response("CRITICAL ERROR (step_inputs): this should never happen.", status_code = 500)
+    # outputs
+    if (step_number_param == 1):
+      step_output_train_data = cwlgen.CommandOutputParameter(
+                                param_id="step1_output_train_dataset",
+                                label="step1_output_train_dataset",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*_train_dataset.csv"),
+                                doc="Output train dataset corresponding to the step 1"
+                                )
+      step.outputs.append(step_output_train_data)
+      step_output_test_data = cwlgen.CommandOutputParameter(
+                                param_id="step1_output_test_dataset",
+                                label="step1_output_test_dataset",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*_test_dataset.csv"),
+                                doc="Output test dataset corresponding to the step 1"
+                                )
+      step.outputs.append(step_output_test_data)
+    elif (step_number_param == 2):
+      step_output_train_data = cwlgen.CommandOutputParameter(
+                                param_id="step2_output_train_dataset_with_predictions",
+                                label="step2_output_train_dataset_with_predictions",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="step2_train_dataset_with_predictions.csv"),
+                                doc="Output train dataset corresponding to the step 2 (with predictions)"
+                                )
+      step.outputs.append(step_output_train_data)
+      step_output_test_data = cwlgen.CommandOutputParameter(
+                                param_id="step2_output_test_dataset_with_predictions",
+                                label="step2_output_test_dataset_with_predictions",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="step2_test_dataset_with_predictions.csv"),
+                                doc="Output test dataset corresponding to the step 2 (with predictions)"
+                                )
+      step.outputs.append(step_output_test_data)
+      step_output_model = cwlgen.CommandOutputParameter(
+                                param_id="step2_output_pickel_model",
+                                label="step2_output_pickel_model",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="step2_model.pickle"),
+                                doc="Model in pickle format"
+                                )
+      step.outputs.append(step_output_model)
+    elif (step_number_param == 3):
+      step_output_train_data = cwlgen.CommandOutputParameter(
+                                param_id="step3_output_train_dataset_with_predictions",
+                                label="step3_output_train_dataset_with_predictions",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*_output_train_dataset_with_predictions.csv"),
+                                doc="Train dataset in CSV format with the final predictions"
+                                )
+      step.outputs.append(step_output_train_data)
+      step_output_test_data = cwlgen.CommandOutputParameter(
+                                param_id="step3_output_test_dataset_with_predictions",
+                                label="step3_output_test_dataset_with_predictions",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*_output_test_dataset_with_predictions.csv"),
+                                doc="Test dataset in CSV format with the final predictions"
+                                )
+      step.outputs.append(step_output_test_data)
+      step_output_model = cwlgen.CommandOutputParameter(
+                                param_id="step3_output_pickle_model",
+                                label="step3_output_pickle_model",
+                                param_type='File',
+                                output_binding=cwlgen.CommandOutputBinding(glob="*.pickle"),
+                                doc="Model in pickle format"
+                                )
+      step.outputs.append(step_output_model)
+    else:
+      # We checked at the beginning that 'step_number_param' parameter is ok. This should never happen.
+      return Response("CRITICAL ERROR (step_output): this should never happen.", status_code = 500)
+    return PlainTextResponse(step.export_string())
+  except Exception as e:
+    return Response("ERROR generating step" + str(step_number_param) + ".cwl file: " + str(e), status_code = 500)
+
+@app.route('/SVC/getMainCwl', methods=['GET'])
+async def SVCGetMainCwl(request):
+  try:
+    # Workflow
+    workflow_object = cwlgen.workflow.Workflow(
+                      workflow_id="SVC_workflow",
+                      label="SVC_workflow",
+                      doc="Main workflow for the SVC technique",
+                      cwl_version="v1.0"
+                      )
+    # requirements
+    # - IMPORTANT: it must be a list.
+    workflow_object.requirements = [ cwlgen.SubworkflowFeatureRequirement() ]
+    # steps
+    step1 = cwlgen.workflow.WorkflowStep(
+                        step_id="step1",
+                        run="cwl/step1.cwl"
+                        )
+    step1.inputs.append( cwlgen.WorkflowStepInput(input_id="step1_python_file", source="step1_python_file") )
+    step1.inputs.append( cwlgen.WorkflowStepInput(input_id="step1_input_train_dataset", source="step1_input_train_dataset") )
+    step1.inputs.append( cwlgen.WorkflowStepInput(input_id="step1_input_test_dataset", source="step1_input_test_dataset") )
+    step1.out.append( cwlgen.WorkflowStepOutput(output_id="step1_output_train_dataset") )
+    step1.out.append( cwlgen.WorkflowStepOutput(output_id="step1_output_test_dataset") )
+    workflow_object.steps.append( step1 )
+    step2 = cwlgen.workflow.WorkflowStep(
+                        step_id="step2",
+                        run="cwl/step2.cwl"
+                        )
+    step2.inputs.append( cwlgen.WorkflowStepInput(input_id="step2_python_file", source="step2_python_file") )
+    step2.inputs.append( cwlgen.WorkflowStepInput(input_id="step2_input_train_dataset", source="step1/step1_output_train_dataset") )
+    step2.inputs.append( cwlgen.WorkflowStepInput(input_id="step2_input_test_dataset", source="step1/step1_output_test_dataset") )
+    step2.out.append( cwlgen.WorkflowStepOutput(output_id="step2_output_train_dataset_with_predictions") )
+    step2.out.append( cwlgen.WorkflowStepOutput(output_id="step2_output_test_dataset_with_predictions") )
+    step2.out.append( cwlgen.WorkflowStepOutput(output_id="step2_output_pickel_model") )
+    workflow_object.steps.append( step2 )
+    step3 = cwlgen.workflow.WorkflowStep(
+                        step_id="step3",
+                        run="cwl/step3.cwl"
+                        )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_python_file", source="step3_python_file") )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_input_train_dataset_with_predictions", source="step2/step2_output_train_dataset_with_predictions") )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_input_test_dataset_with_predictions", source="step2/step2_output_test_dataset_with_predictions") )
+    step3.inputs.append( cwlgen.WorkflowStepInput(input_id="step3_input_pickle_model", source="step2/step2_output_pickel_model") )
+    step3.out.append( cwlgen.WorkflowStepOutput(output_id="step3_output_train_dataset_with_predictions") )
+    step3.out.append( cwlgen.WorkflowStepOutput(output_id="step3_output_test_dataset_with_predictions") )
+    step3.out.append( cwlgen.WorkflowStepOutput(output_id="step3_output_pickle_model") )
+    workflow_object.steps.append( step3 )
+    # inputs
+    workflow_input_step1_python_file = cwlgen.workflow.InputParameter(
+                                        param_id="step1_python_file",
+                                        label="step1_python_file",
+                                        doc="Python file corresponding to the step 1",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step1_python_file )
+    workflow_input_step1_input_train_dataset = cwlgen.workflow.InputParameter(
+                                        param_id="step1_input_train_dataset",
+                                        label="step1_input_train_dataset",
+                                        doc="Train dataset corresponding to the step 1",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step1_input_train_dataset )
+    workflow_input_step1_input_test_dataset = cwlgen.workflow.InputParameter(
+                                        param_id="step1_input_test_dataset",
+                                        label="step1_input_test_dataset",
+                                        doc="Test dataset corresponding to the step 1",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step1_input_test_dataset )
+    workflow_input_step2_python_file = cwlgen.workflow.InputParameter(
+                                        param_id="step2_python_file",
+                                        label="step2_python_file",
+                                        doc="Python file corresponding to the step 2",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step2_python_file )
+    workflow_input_step3_python_file = cwlgen.workflow.InputParameter(
+                                        param_id="step3_python_file",
+                                        label="step3_python_file",
+                                        doc="Python file corresponding to the step 3",
+                                        param_type="File"
+                                        )
+    workflow_object.inputs.append( workflow_input_step3_python_file )
+    # outputs
+    workflow_output = cwlgen.workflow.WorkflowOutputParameter(
+                                param_id="step3_output_train_dataset_with_predictions",
+                                output_source="step3/step3_output_train_dataset_with_predictions",
+                                label="step3_output_train_dataset_with_predictions",
+                                doc="Train dataset in CSV format with the final predictions",
+                                param_type="File"
+                                )
+    workflow_object.outputs.append(workflow_output)
+    workflow_output = cwlgen.workflow.WorkflowOutputParameter(
+                                param_id="step3_output_test_dataset_with_predictions",
+                                output_source="step3/step3_output_test_dataset_with_predictions",
+                                label="step3_output_test_dataset_with_predictions",
+                                doc="Test dataset in CSV format with the final predictions",
+                                param_type="File"
+                                )
+    workflow_object.outputs.append(workflow_output)
+    workflow_output = cwlgen.workflow.WorkflowOutputParameter(
+                                param_id="step3_output_pickle_model",
+                                output_source="step3/step3_output_pickle_model",
+                                label="step3_output_pickle_model",
+                                doc="Model in pickle format",
+                                param_type="File"
+                                )
+    workflow_object.outputs.append(workflow_output)
+    return PlainTextResponse(workflow_object.export_string())
+  except Exception as e: # Any exception.
+    return Response("ERROR generating main.cwl file: " + str(e), status_code = 500)
+
+@app.route('/SVC/generateMainYml/{train_dataset_name:str}/{test_dataset_name:str}', methods=['GET'])
+async def SVCGenerateMainYml(request):
+  try:
+    main_yml_file_content = "step1_python_file:\n  class: File\n  path: python/step1.py\n"
+    main_yml_file_content = main_yml_file_content + "step1_input_train_dataset:\n  class: File\n  path: files/" + request.path_params['train_dataset_name'] + "\n"
+    main_yml_file_content = main_yml_file_content + "step1_input_test_dataset:\n  class: File\n  path: files/" + request.path_params['test_dataset_name'] + "\n"
+    main_yml_file_content = main_yml_file_content + "step2_python_file:\n  class: File\n  path: python/step2.py\n"
+    main_yml_file_content = main_yml_file_content + "step3_python_file:\n  class: File\n  path: python/step3.py\n"
+    return PlainTextResponse(main_yml_file_content)
+  except Exception as e: # Any exception.
+    return Response("ERROR generating main.yml file: " + str(e), status_code = 500)
