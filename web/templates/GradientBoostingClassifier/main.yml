@@ -3,10 +3,10 @@ step1_python_file:
   path: python/step1.py
 step1_input_train_dataset:
   class: File
-  path: files/train.csv
+  path: files/<TRAIN_DATASET_NAME>
 step1_input_test_dataset:
   class: File
-  path: files/test.csv
+  path: files/<TEST_DATASET_NAME>
 step2_python_file:
   class: File
   path: python/step2.py
