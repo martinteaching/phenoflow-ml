@@ -57,6 +57,9 @@ const workflowUtils = require("./util/workflow");
 
 const tbc = require("./routes/tbc")
 const LogisticRegression = require("./routes/LogisticRegression")
+const GradientBoostingClassifier = require("./routes/GradientBoostingClassifier")
+const RandomForestClassifier = require("./routes/RandomForestClassifier")
+const SVC = require("./routes/SVC")
 
 const app = express();
 app.enable('strict routing');
@@ -86,6 +89,9 @@ router.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 router.use("/tbc", tbc)
 router.use("/LogisticRegression", LogisticRegression)
+router.use("/GradientBoostingClassifier", GradientBoostingClassifier)
+router.use("/RandomForestClassifier", RandomForestClassifier)
+router.use("/SVC", SVC)
 
 app.use("/phenoflow", router);
 
