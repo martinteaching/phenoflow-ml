@@ -39,5 +39,5 @@ outputs:
     glob: 'step2_model.pickle'
 requirements:
   DockerRequirement:
-    dockerPull: kclhi/regression:latest
+    dockerPull: continuumio/anaconda3:2024.10-1
 s:type: logic

@@ -93,7 +93,7 @@ async def tbcGetStepCwl(request):
     step.namespaces = step_namespace
     # requirements
     # - IMPORTANT: it must be a list.
-    step.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
+    step.requirements = [ cwlgen.DockerRequirement(docker_pull="continuumio/anaconda3:2024.10-1") ]
     # metadata
     if (step_number_param == 1):
       metadata = {'type' : 'load'}
@@ -327,7 +327,7 @@ async def LogisticRegressionGetStepCwl(request):
     step.namespaces = step_namespace
     # requirements
     # - IMPORTANT: it must be a list.
-    step.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
+    step.requirements = [ cwlgen.DockerRequirement(docker_pull="continuumio/anaconda3:2024.10-1") ]
     # metadata
     if (step_number_param == 1):
       metadata = {'type' : 'load'}
@@ -637,7 +637,7 @@ async def GradientBoostingClassifierGetStepCwl(request):
     step.namespaces = step_namespace
     # requirements
     # - IMPORTANT: it must be a list.
-    step.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
+    step.requirements = [ cwlgen.DockerRequirement(docker_pull="continuumio/anaconda3:2024.10-1") ]
     # metadata
     if (step_number_param == 1):
       metadata = {'type' : 'load'}
@@ -947,7 +947,7 @@ async def RandomForestClassifierGetStepCwl(request):
     step.namespaces = step_namespace
     # requirements
     # - IMPORTANT: it must be a list.
-    step.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
+    step.requirements = [ cwlgen.DockerRequirement(docker_pull="continuumio/anaconda3:2024.10-1") ]
     # metadata
     if (step_number_param == 1):
       metadata = {'type' : 'load'}
@@ -1257,7 +1257,7 @@ async def SVCGetStepCwl(request):
     step.namespaces = step_namespace
     # requirements
     # - IMPORTANT: it must be a list.
-    step.requirements = [ cwlgen.DockerRequirement(docker_pull="kclhi/regression:latest") ]
+    step.requirements = [ cwlgen.DockerRequirement(docker_pull="continuumio/anaconda3:2024.10-1") ]
     # metadata
     if (step_number_param == 1):
       metadata = {'type' : 'load'}

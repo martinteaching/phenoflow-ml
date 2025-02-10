@@ -34,5 +34,5 @@ outputs:
     glob: '*_test_dataset.csv'
 requirements:
   DockerRequirement:
-    dockerPull: kclhi/regression:latest
+    dockerPull: continuumio/anaconda3:2024.10-1
 s:type: load

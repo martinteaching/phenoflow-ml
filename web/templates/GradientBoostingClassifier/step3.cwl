@@ -44,5 +44,5 @@ outputs:
     glob: '*.pickle'
 requirements:
   DockerRequirement:
-    dockerPull: kclhi/regression:latest
+    dockerPull: continuumio/anaconda3:2024.10-1
 s:type: output

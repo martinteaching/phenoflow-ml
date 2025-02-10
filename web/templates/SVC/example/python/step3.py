@@ -11,11 +11,11 @@ import pickle
 train_dataset_with_predictions = pd.read_csv(sys.argv[1])
 test_dataset_with_predictions = pd.read_csv(sys.argv[2])
 # Write the datasts.
-train_dataset_with_predictions.to_csv("name_<WORKFLOW_NAME>_id_<WORKFLOW_ID>_output_train_dataset_with_predictions.csv")
-test_dataset_with_predictions.to_csv("name_<WORKFLOW_NAME>_id_<WORKFLOW_ID>_output_test_dataset_with_predictions.csv")
+train_dataset_with_predictions.to_csv("name_svc001_id_1_output_train_dataset_with_predictions.csv")
+test_dataset_with_predictions.to_csv("name_svc001_id_1_output_test_dataset_with_predictions.csv")
 # Read the model.
 input_model_file = open(sys.argv[3], "rb")
-output_model_file = open("name_<WORKFLOW_NAME>_id_<WORKFLOW_ID>_output_pickle_model.pickle", "wb")
+output_model_file = open("name_svc001_id_1_output_pickle_model.pickle", "wb")
 pickle.dump(pickle.load(input_model_file), output_model_file)
 input_model_file.close()
 output_model_file.close()
