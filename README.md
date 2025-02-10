@@ -1,17 +1,3 @@
-<img src="logo.png" alt="phenoflow" width="150">
-
-Portable, workflow-based phenotype definitions.
-
-[Live site](https://kclhi.org/phenoflow) | [Wiki](../../wiki) | [API](https://kclhi.org/phenoflow/docs/)
-
-Cite as _[Phenoflow: A Microservice Architecture for Portable Workflow-based Phenotype Definitions](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8378606/). Chapman, Martin et al. AMIA Summits on Translational Science. 2021._
-
-___
-
-Components of the Phenoflow architecture.
-
-[![StackShare](http://img.shields.io/badge/tech-stack-0690fa.svg?style=flat)](https://stackshare.io/martinchapman/phenoflow)
-
 ## Prerequisites
 
 1. [Docker (machine)](https://docs.docker.com/machine/install-machine/).
@@ -77,7 +63,7 @@ MYSQL_DATABASE=
 
 ## Development
 
-<img src="architecture.png" width="650">
+<img src="docs/images/architecture.png" width="650">
 
 This is an [express](https://expressjs.com/) (lightweight server) project. The majority of the logic is contained within [web/app.js](web/app.js), and in the [web/routes](web/routes) and [web/util](web/util) folders.
 
@@ -198,17 +184,9 @@ docker-compose -f docker-compose.test.yml up;
 
 The server runs by default on port 3003. Visit localhost:3003/[route] to test changes to GET endpoints and use software such as [Postman](https://www.getpostman.com/) to test changes to POST (and other) endpoints.
 
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
-
 ## Versioning
 
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/martinchapman/nokia-health/tags).
-
-## Authors
-
-[kclhi](https://kclhi.org)
 
 ## License
 
