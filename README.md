@@ -63,7 +63,7 @@ MYSQL_DATABASE=
 
 ## Development
 
-<img src="docs/images/architecture.png" width="650">
+<img src="docs/files/architecture.png" width="650">
 
 This is an [express](https://expressjs.com/) (lightweight server) project. The majority of the logic is contained within [src/web/app.js](src/web/app.js), and in the [src/web/routes](src/web/routes) and [src/web/util](src/web/util) folders.
 

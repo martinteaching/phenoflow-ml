@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>API Documentation - Common Workflow Language Viewer</title>
+        <link rel="stylesheet" href="./files/bootstrap.min.css">
+        <link rel="stylesheet" href="./files/github.css">
+        <link rel="stylesheet" type="text/css" href="./files/main-20180518.css">
+    <script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="docs" src="./files/docs.js.descarga"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="jquery" src="./files/jquery.min.js.descarga"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="highlight" src="./files/highlight.pack.min.js.descarga"></script></head>
+    <body>
+
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">                    
+                    <a href="ml-api.html" class="button navbar-toggle">API for ML-based phenotyping</a>
+                    <a href="cwl-api.html" class="button navbar-toggle">API for Workflow-based phenotyping</a>
+                    <a href="about.html" class="button navbar-toggle">About</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="cwl-api.html">API for Workflow-based phenotyping</a></li>
+                        <li><a href="ml-api.html">API for ML-based phenotyping</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+
+
+<!-- Base API -->
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12" role="main" id="main">
+                    <h1>JSON API Documentation</h1>
+                    <div class="alert alert-warning"><strong>Disclaimer:</strong> The API is still under heavy development and breaking changes to endpoints or parameters may be made</div>
+
+                    <p>If you make anything utilizing our API, please <a href="https://gitter.im/common-workflow-language/cwlviewer" alt="Gitter Chatroom" target="_blank" rel="noopener">let us know about it</a> - we would love to see!</p>
+
+                    <p>Except where noted otherwise, all queries require the following header to receive a JSON response:
+                        </p><pre class="highlight http hljs"><span class="hljs-attribute">accept</span>: application/json</pre>
+                    <p></p>
+
+                    <h2>Workflow</h2>
+
+                    <h3 id="getWorkflow">Search for an imported phenotype (Workflow)</h3>
+                    <span class="method post">POST</span>
+                    <pre>/phenoflow/phenotype/all</pre>
+                    <h4>Parameters</h4>
+                    <table class="table">
+                        <tbody><tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>importedId</td>
+                            <td>String</td>
+                            <td>The original ID associated with the source phenotype that has been imported as a Workflow into Phenoflow (e.g. 'PH222', HDR UK Phenotype Library)</td>
+                        </tr>
+                    </tbody></table>
+                    <h4>Input</h4>
+<pre class="highlight json hljs">{
+    <span class="hljs-attr">"importedId"</span>: <span class="hljs-string">"PH222"</span>
+}</pre>
+                    <h4>Success</h4>
+                    <table class="table">
+                        <tbody><tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>github_url</td>
+                            <td>String</td>
+                            <td>A link to the Workflow source of the imported phenotype on GitHub</td>
+                        </tr>
+                        <tr>
+                            <td>url</td>
+                            <td>String</td>
+                            <td>A link to a visualisation of the imported phenotype on Phenoflow</td>
+                        </tr>
+                        <tr>
+                            <td>short_url</td>
+                            <td>String</td>
+                            <td>A shorthand link to a visualisation of the imported phenotype on Phenoflow. NB. although potentially easier to work with, this link makes assumptions about the nature of the Workflow that may not hold.</td>
+                        </tr>
+                    </tbody></table>
+<pre class="highlight json hljs">HTTP/<span class="hljs-number">1.1</span> <span class="hljs-number">200</span> OK
+{
+    <span class="hljs-attr">"github_url"</span>:<span class="hljs-string">"https://github.com/phenoflow/Obstructive-and-reflux-uropathy---e0e470b0-1798-11ef-9de4-4d4ea830ad16"</span>,
+    <span class="hljs-attr">"url"</span>:<span class="hljs-string">"https://kclhi.org/phenoflow/workflows/github.com/phenoflow/Obstructive-and-reflux-uropathy---e0e470b0-1798-11ef-9de4-4d4ea830ad16/blob/read-potential-cases-fhir/Obstructive-and-reflux-uropathy.cwl"</span>,
+    <span class="hljs-attr">"short_url"</span>:<span class="hljs-string">"https://kclhi.org/phenoflow/Obstructive-and-reflux-uropathy---e0e470b0-1798-11ef-9de4-4d4ea830ad16"</span>
+}</pre>
+                    <h4>Error</h4>
+                    <pre class="highlight http hljs">HTTP/1.1 <span class="hljs-number">404</span> Not Found</pre>
+
+                    <h3 id="addWorkflow">Add a new Workflow</h3>
+                    <div class="alert alert-info"><strong>Note:</strong> Due to cwltool run times, the creation of workflows is done asynchronously and an intermediate <a href="https://kclhi.org/phenoflow/apidocs#queue">queue resource</a> is used</div>
+                    <span class="method post">POST</span>
+                    <pre>/workflows</pre>
+                    <h4>Parameters</h4>
+                    <table class="table">
+                        <tbody><tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>url</td>
+                            <td>String</td>
+                            <td>The URL of the repository. Either a gitlab.com or github.com URL, or any Git repository URL. If a gitlab.com or github.com repository URL is used, the following fields will take priority over those parsed from the URL if provided.</td>
+                        </tr>
+                        <tr>
+                            <td>branch</td>
+                            <td>String</td>
+                            <td>The branch of the repository. Required if the URL is not from gitlab.com or github.com.</td>
+                        </tr>
+                        <tr>
+                            <td>path</td>
+                            <td>String</td>
+                            <td>The path within the repository to the workflow file. Required if the URL is not from gitlab.com or github.com.</td>
+                        </tr>
+                        <tr>
+                            <td>packedId</td>
+                            <td>String</td>
+                            <td>The ID of the workflow, to be provided if the workflow file is packed (contains multiple descriptions with <code>$graph</code>).</td>
+                        </tr>
+                    </tbody></table>
+                    <h4>Input</h4>
+<pre class="highlight json hljs">{
+    <span class="hljs-attr">"url"</span>: <span class="hljs-string">"https://github.com/common-workflow-language/workflows/tree/master/workflows/compile/compile1.cwl"</span>
+}
+</pre>
+<pre class="highlight json hljs">{
+    <span class="hljs-attr">"url"</span>: <span class="hljs-string">"https://bitbucket.org/markrobinson96/workflows.git"</span>,
+    <span class="hljs-attr">"branch"</span>: <span class="hljs-string">"master"</span>,
+    <span class="hljs-attr">"path"</span>: <span class="hljs-string">"/workflows/make-to-cwl/dna.cwl"</span>
+}
+</pre>
+                    <h4>Success</h4>
+<pre class="highlight http hljs">HTTP/1.1 <span class="hljs-number">202</span> Accepted
+<span class="hljs-attribute">Location</span>: /queue/:queueid
+</pre>
+                    <h4>Already Exists</h4>
+<pre class="highlight http hljs">HTTP/1.1 <span class="hljs-number">303</span> See Other
+<span class="hljs-attribute">Location</span>: /workflows/:URL
+</pre>
+                    <h4>Packed Workflow with Multiple Choices</h4>
+                    <pre class="highlight json hljs">HTTP/<span class="hljs-number">1.1</span> <span class="hljs-number">422</span> Unprocessable Entity
+{
+    <span class="hljs-attr">"message"</span>: <span class="hljs-string">"This workflow file is packed and contains multiple workflow descriptions. Please provide a packedId parameter with one of the following values"</span>
+    <span class="hljs-string">"packedId"</span>: [
+        <span class="hljs-string">"workflow.cwl"</span>,
+        <span class="hljs-string">"main"</span>,
+        <span class="hljs-string">"workflow_exome.cwl"</span>,
+        <span class="hljs-string">"align.cwl"</span>,
+        <span class="hljs-string">"workflow.cwl_2"</span>
+    ]
+}
+</pre>
+                    <h4>Error</h4>
+                    <pre class="highlight http hljs">HTTP/1.1 <span class="hljs-number">400</span> Bad Request</pre>
+
+                    <h3 id="workflowDetails">Get Workflow Details</h3>
+                    <span class="method get">GET</span>
+                    <pre>/workflows/:url</pre>
+                    <h4>Parameters</h4>
+                    <table class="table">
+                        <tbody><tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>url</td>
+                            <td>String</td>
+                            <td>Partial URL to the workflow eg "github.com/owner/repo/tree/branch/workflow.cwl" or "bitbucket.org/owner/repo.git/master/workflow.cwl</td>
+                        </tr>
+                    </tbody></table>
+                    <h4>Success 200</h4>
+                    <table class="table">
+                        <tbody><tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>retrievedFrom.repoUrl</td>
+                            <td>String</td>
+                            <td>URL of the Github repository</td>
+                        </tr>
+                        <tr>
+                            <td>retrievedFrom.branch</td>
+                            <td>String</td>
+                            <td>Github branch name or commit ID</td>
+                        </tr>
+                        <tr>
+                            <td>retrievedFrom.path</td>
+                            <td>String</td>
+                            <td>Path to the workflow within the repository</td>
+                        </tr>
+                        <tr>
+                            <td>retrievedFrom.packedId</td>
+                            <td>String</td>
+                            <td>The ID of the workflow within the file, if this is a packed CWL file (contains a <a href="http://www.commonwl.org/draft-3/SchemaSalad.html#Document_graph">document graph</a>).</td>
+                        </tr>
+                        <tr>
+                            <td>retrievedFrom.url</td>
+                            <td>URL</td>
+                            <td>The URL to the page on the site if type is not GENERIC, otherwise the same as repoUrl</td>
+                        </tr>
+                        <tr>
+                            <td>retrievedFrom.rawUrl</td>
+                            <td>URL</td>
+                            <td>The URL directly to the file if type is not GENERIC, otherwise the same as repoUrl</td>
+                        </tr>
+                        <tr>
+                            <td>retrievedFrom.type</td>
+                            <td>Enum</td>
+                            <td>One of GENERIC, GITHUB, GITLAB, BITBUCKET</td>
+                        </tr>
+                        <tr>
+                            <td>retrievedOn</td>
+                            <td>Date</td>
+                            <td>The last time this workflow was updated from the branch</td>
+                        </tr>
+                        <tr>
+                            <td>lastCommit</td>
+                            <td>String</td>
+                            <td>The last commit ID on the branch</td>
+                        </tr>
+                        <tr>
+                            <td>label</td>
+                            <td>String</td>
+                            <td>The label string for the workflow from the CWL description</td>
+                        </tr>
+                        <tr>
+                            <td>doc</td>
+                            <td>String</td>
+                            <td>The doc string for the workflow from the CWL description</td>
+                        </tr>
+                        <tr>
+                            <td>inputs</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>outputs</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>steps</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>dockerLink</td>
+                            <td>String</td>
+                            <td>The URL to dockerhub or "true" if an unrecognised image is used in a docker hint or requirement</td>
+                        </tr>
+                        <tr>
+                            <td>cwltoolVersion</td>
+                            <td>String</td>
+                            <td>The version of cwltool used to parse the workflow</td>
+                        </tr>
+                        <tr>
+                            <td>visualisationDot</td>
+                            <td>String</td>
+                            <td>The DOT source used to generate the visualisation image</td>
+                        </tr>
+                        <tr>
+                            <td>visualisationXdot</td>
+                            <td>URL</td>
+                            <td>A link to the xdot source code for the visualisation image</td>
+                        </tr>
+                        <tr>
+                            <td>visualisationPng</td>
+                            <td>URL</td>
+                            <td>A link to the png format visualisation image</td>
+                        </tr>
+                        <tr>
+                            <td>visualisationSvg</td>
+                            <td>URL</td>
+                            <td>A link to the svg format visualisation image</td>
+                        </tr>
+                        <tr>
+                            <td>robundle</td>
+                            <td>URL</td>
+                            <td>A link to the <a href="http://www.researchobject.org/" alt="Research Objects">Research Object</a> Bundle download</td>
+                        </tr>
+                    </tbody></table>
+                    <h5>Example URL</h5>
+                    <pre>/workflows/github.com/common-workflow-language/workflows/tree/master/workflows/lobSTR/lobSTR-workflow.cwl</pre>
+                    <h5>Example Response</h5>
+<pre class="highlight json hljs">{
+    <span class="hljs-attr">"retrievedFrom"</span>: {
+        <span class="hljs-attr">"repoUrl"</span>: <span class="hljs-string">"https://github.com/common-workflow-language/workflows.git"</span>,
+        <span class="hljs-attr">"branch"</span>: <span class="hljs-string">"master"</span>,
+        <span class="hljs-attr">"path"</span>: <span class="hljs-string">"workflows/lobSTR/lobSTR-workflow.cwl"</span>,
+        <span class="hljs-attr">"url"</span>: <span class="hljs-string">"https://github.com/common-workflow-language/workflows/blob/master/workflows/lobSTR/lobSTR-workflow.cwl"</span>,
+        <span class="hljs-attr">"rawUrl"</span>: <span class="hljs-string">"https://raw.githubusercontent.com/common-workflow-language/workflows/master/workflows/lobSTR/lobSTR-workflow.cwl"</span>,
+        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"GITHUB"</span>
+    },
+    <span class="hljs-attr">"retrievedOn"</span>: <span class="hljs-number">1502714218616</span>,
+    <span class="hljs-attr">"lastCommit"</span>: <span class="hljs-string">"17b65ea19d81527090fded62ffa0e1ba3b25d561"</span>,
+    <span class="hljs-attr">"label"</span>: <span class="hljs-string">"lobSTR-workflow.cwl"</span>,
+    <span class="hljs-attr">"inputs"</span>: {
+        <span class="hljs-attr">"reference"</span>: {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"File"</span>
+        },
+        <span class="hljs-attr">"rg-sample"</span>: {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"String"</span>
+        },
+        <span class="hljs-attr">"p1"</span>: {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"ee54066e73d068edfbf9ca5059e14acd"</span>
+        },
+        <span class="hljs-attr">"p2"</span>: {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"79ab371b6d0fdbadbf9a4a89ef393353"</span>
+        },
+        <span class="hljs-attr">"output_prefix"</span>: {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"String"</span>
+        },
+        <span class="hljs-attr">"rg-lib"</span>: {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"String"</span>
+        },
+        <span class="hljs-attr">"strinfo"</span>: {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"File"</span>
+        },
+        <span class="hljs-attr">"noise_model"</span>: {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"File"</span>
+        }
+    },
+    <span class="hljs-attr">"outputs"</span>: {
+        <span class="hljs-attr">"vcf"</span>: {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"File"</span>
+        },
+        <span class="hljs-attr">"vcf_stats"</span>: {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"File"</span>
+        },
+        <span class="hljs-attr">"bam_stats"</span>: {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"File"</span>
+        },
+        <span class="hljs-attr">"bam"</span>: {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"File"</span>
+        }
+    },
+    <span class="hljs-attr">"steps"</span>: {
+        <span class="hljs-attr">"allelotype"</span>: {
+            <span class="hljs-attr">"run"</span>: <span class="hljs-string">"allelotype.cwl"</span>,
+            <span class="hljs-attr">"runType"</span>: <span class="hljs-string">"COMMANDLINETOOL"</span>,
+            <span class="hljs-attr">"sources"</span>: {
+                <span class="hljs-attr">"file:///data/git/3ec0d19076841a1140e71cc3a1b330a56099aac2/workflows/lobSTR/lobSTR-workflow.cwl#allelotype/bam"</span>: {
+                    <span class="hljs-attr">"sourceIDs"</span>: [
+                        <span class="hljs-string">"samindex"</span>
+                    ]
+                },
+                <span class="hljs-attr">"allelotype"</span>: {
+                    <span class="hljs-attr">"sourceIDs"</span>: [
+                        <span class="hljs-string">"strinfo"</span>
+                    ]
+                },
+                <span class="hljs-attr">"file:///data/git/3ec0d19076841a1140e71cc3a1b330a56099aac2/workflows/lobSTR/lobSTR-workflow.cwl#allelotype/noise_model"</span>: {
+                    <span class="hljs-attr">"sourceIDs"</span>: [
+                        <span class="hljs-string">"noise_model"</span>
+                    ]
+                },
+                <span class="hljs-attr">"file:///data/git/3ec0d19076841a1140e71cc3a1b330a56099aac2/workflows/lobSTR/lobSTR-workflow.cwl#allelotype/reference"</span>: {
+                    <span class="hljs-attr">"sourceIDs"</span>: [
+                        <span class="hljs-string">"reference"</span>
+                    ]
+                },
+                <span class="hljs-attr">"file:///data/git/3ec0d19076841a1140e71cc3a1b330a56099aac2/workflows/lobSTR/lobSTR-workflow.cwl#allelotype/output_prefix"</span>: {
+                    <span class="hljs-attr">"sourceIDs"</span>: [
+                        <span class="hljs-string">"output_prefix"</span>
+                    ]
+                }
+            }
+        },
+        <span class="hljs-attr">"samsort"</span>: {
+            <span class="hljs-attr">"run"</span>: <span class="hljs-string">"samtools-sort.cwl"</span>,
+            <span class="hljs-attr">"runType"</span>: <span class="hljs-string">"COMMANDLINETOOL"</span>,
+            <span class="hljs-attr">"sources"</span>: {
+                <span class="hljs-attr">"samsort"</span>: {
+                    <span class="hljs-attr">"sourceIDs"</span>: [
+                        <span class="hljs-string">"lobSTR"</span>
+                    ]
+                },
+                <span class="hljs-attr">"file:///data/git/3ec0d19076841a1140e71cc3a1b330a56099aac2/workflows/lobSTR/lobSTR-workflow.cwl#samsort/output_name"</span>: {
+                    <span class="hljs-attr">"defaultVal"</span>: <span class="hljs-string">"\\\"aligned.sorted.bam\\\""</span>
+                }
+            }
+        },
+        <span class="hljs-attr">"lobSTR"</span>: {
+            <span class="hljs-attr">"label"</span>: <span class="hljs-string">"lobSTR"</span>,
+            <span class="hljs-attr">"run"</span>: <span class="hljs-string">"lobSTR-tool.cwl"</span>,
+            <span class="hljs-attr">"runType"</span>: <span class="hljs-string">"COMMANDLINETOOL"</span>,
+            <span class="hljs-attr">"sources"</span>: {
+                <span class="hljs-attr">"lobSTR"</span>: {
+                    <span class="hljs-attr">"sourceIDs"</span>: [
+                        <span class="hljs-string">"rg-lib"</span>
+                    ]
+                },
+                <span class="hljs-attr">"file:///data/git/3ec0d19076841a1140e71cc3a1b330a56099aac2/workflows/lobSTR/lobSTR-workflow.cwl#lobSTR/p1"</span>: {
+                    <span class="hljs-attr">"sourceIDs"</span>: [
+                        <span class="hljs-string">"p1"</span>
+                    ]
+                },
+                <span class="hljs-attr">"file:///data/git/3ec0d19076841a1140e71cc3a1b330a56099aac2/workflows/lobSTR/lobSTR-workflow.cwl#lobSTR/p2"</span>: {
+                    <span class="hljs-attr">"sourceIDs"</span>: [
+                        <span class="hljs-string">"p2"</span>
+                    ]
+                },
+                <span class="hljs-attr">"file:///data/git/3ec0d19076841a1140e71cc3a1b330a56099aac2/workflows/lobSTR/lobSTR-workflow.cwl#lobSTR/output_prefix"</span>: {
+                    <span class="hljs-attr">"sourceIDs"</span>: [
+                        <span class="hljs-string">"output_prefix"</span>
+                    ]
+                },
+                <span class="hljs-attr">"file:///data/git/3ec0d19076841a1140e71cc3a1b330a56099aac2/workflows/lobSTR/lobSTR-workflow.cwl#lobSTR/rg-sample"</span>: {
+                    <span class="hljs-attr">"sourceIDs"</span>: [
+                        <span class="hljs-string">"rg-sample"</span>
+                    ]
+                },
+                <span class="hljs-attr">"file:///data/git/3ec0d19076841a1140e71cc3a1b330a56099aac2/workflows/lobSTR/lobSTR-workflow.cwl#lobSTR/reference"</span>: {
+                    <span class="hljs-attr">"sourceIDs"</span>: [
+                        <span class="hljs-string">"reference"</span>
+                    ]
+                }
+            }
+        },
+        <span class="hljs-attr">"samindex"</span>: {
+            <span class="hljs-attr">"run"</span>: <span class="hljs-string">"samtools-index.cwl"</span>,
+            <span class="hljs-attr">"runType"</span>: <span class="hljs-string">"COMMANDLINETOOL"</span>,
+            <span class="hljs-attr">"sources"</span>: {
+                <span class="hljs-attr">"samindex"</span>: {
+                    <span class="hljs-attr">"sourceIDs"</span>: [
+                        <span class="hljs-string">"samsort"</span>
+                    ]
+                }
+            }
+        }
+    },
+    <span class="hljs-attr">"dockerLink"</span>: <span class="hljs-string">"https://hub.docker.com/r/rabix/lobstr"</span>,
+    <span class="hljs-attr">"cwltoolVersion"</span>: <span class="hljs-string">"1.0.20170810192106"</span>,
+    <span class="hljs-attr">"visualisationDot"</span>: <span class="hljs-string">"digraph workflow {\n  graph [\n    bgcolor = \"#eeeeee\"\n    color = \"black\"\n    fontsize = \"10\"\n    labeljust = \"left\"\n    clusterrank = \"local\"\n    ranksep = \"0.22\"\n    nodesep = \"0.05\"\n  ]\n  node [\n    fontname = \"Helvetica\"\n    fontsize = \"10\"\n    fontcolor = \"black\"\n    shape = \"record\"\n    height = \"0\"\n    width = \"0\"\n    color = \"black\"\n    fillcolor = \"lightgoldenrodyellow\"\n    style = \"filled\"\n  ];\n  edge [\n    fontname=\"Helvetica\"\n    fontsize=\"8\"\n    fontcolor=\"black\"\n    color=\"black\"\n    arrowsize=\"0.7\"\n  ];\n  subgraph cluster_inputs {\n    rank = \"same\";\n    style = \"dashed\";\n    label = \"Workflow Inputs\";\n    \"p2\" [fillcolor=\"#94DDF4\",label=\"p2\"];\n    \"p2\" [fillcolor=\"#94DDF4\",label=\"p2\"];\n    \"output_prefix\" [fillcolor=\"#94DDF4\",label=\"output_prefix\"];\n    \"reference\" [fillcolor=\"#94DDF4\",label=\"reference\"];\n    \"noise_model\" [fillcolor=\"#94DDF4\",label=\"noise_model\"];\n    \"strinfo\" [fillcolor=\"#94DDF4\",label=\"strinfo\"];\n    \"p1\" [fillcolor=\"#94DDF4\",label=\"p1\"];\n    \"p1\" [fillcolor=\"#94DDF4\",label=\"p1\"];\n    \"rg-lib\" [fillcolor=\"#94DDF4\",label=\"rg-lib\"];\n    \"rg-sample\" [fillcolor=\"#94DDF4\",label=\"rg-sample\"];\n  }\n  subgraph cluster_outputs {\n    rank = \"same\";\n    style = \"dashed\";\n    labelloc = \"b\";\n    label = \"Workflow Outputs\";\n    \"bam\" [fillcolor=\"#94DDF4\",label=\"bam\"];\n    \"vcf\" [fillcolor=\"#94DDF4\",label=\"vcf\"];\n    \"bam_stats\" [fillcolor=\"#94DDF4\",label=\"bam_stats\"];\n    \"vcf_stats\" [fillcolor=\"#94DDF4\",label=\"vcf_stats\"];\n  }\n  \"allelotype\" [label=\"allelotype\"];\n  \"samsort\" [label=\"samsort\"];\n  \"lobSTR\" [label=\"lobSTR\"];\n  \"samindex\" [label=\"samindex\"];\n  \"strinfo\" -&gt; \"allelotype\" [label=\"strinfo\"];\n  \"reference\" -&gt; \"allelotype\" [label=\"reference\"];\n  \"output_prefix\" -&gt; \"allelotype\" [label=\"output_prefix\"];\n  \"noise_model\" -&gt; \"allelotype\" [label=\"noise_model\"];\n  \"samindex\" -&gt; \"allelotype\" [label=\"bam\"];\n  \"lobSTR\" -&gt; \"samsort\" [label=\"input\"];\n  \"default1\" -&gt; \"samsort\" [label=\"output_name\"];\n  \"default1\" [label=\"\\\"aligned.sorted.bam\\\"\", fillcolor=\"#D5AEFC\"];\n  \"rg-lib\" -&gt; \"lobSTR\" [label=\"rg-lib\"];\n  \"rg-sample\" -&gt; \"lobSTR\" [label=\"rg-sample\"];\n  \"p2\" -&gt; \"lobSTR\" [label=\"p2\"];\n  \"p1\" -&gt; \"lobSTR\" [label=\"p1\"];\n  \"reference\" -&gt; \"lobSTR\" [label=\"reference\"];\n  \"output_prefix\" -&gt; \"lobSTR\" [label=\"output_prefix\"];\n  \"samsort\" -&gt; \"samindex\" [label=\"input\"];\n  \"samindex\" -&gt; \"bam\";\n  \"allelotype\" -&gt; \"vcf\";\n  \"lobSTR\" -&gt; \"bam_stats\";\n  \"allelotype\" -&gt; \"vcf_stats\";\n}\n"</span>,
+    <span class="hljs-attr">"visualisationPng"</span>: <span class="hljs-string">"/graph/png/github.com/common-workflow-language/workflows/blob/master/workflows/lobSTR/lobSTR-workflow.cwl"</span>,
+    <span class="hljs-attr">"visualisationSvg"</span>: <span class="hljs-string">"/graph/svg/github.com/common-workflow-language/workflows/blob/master/workflows/lobSTR/lobSTR-workflow.cwl"</span>,
+    <span class="hljs-attr">"roBundle"</span>: <span class="hljs-string">"/robundle/github.com/common-workflow-language/workflows/blob/master/workflows/lobSTR/lobSTR-workflow.cwl"</span>,
+    <span class="hljs-attr">"visualisationXdot"</span>: <span class="hljs-string">"/graph/xdot/github.com/common-workflow-language/workflows/blob/master/workflows/lobSTR/lobSTR-workflow.cwl"</span>
+}
+</pre>
+
+
+                    <h3>View Workflows</h3>
+                    <span class="method get">GET</span>
+                    <pre>/workflows</pre>
+                    <h4>Parameters</h4>
+                    <table class="table">
+                        <tbody><tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>search</td>
+                            <td>String</td>
+                            <td>Optional: Limits the workflows received to those containing this string in the label or doc</td>
+                        </tr>
+                        <tr>
+                            <td>page</td>
+                            <td>Integer</td>
+                            <td>The page number to access (0 indexed, defaults to 0)</td>
+                        </tr>
+                        <tr>
+                            <td>size</td>
+                            <td>Integer</td>
+                            <td>The page size requested (defaults to 10)</td>
+                        </tr>
+                    </tbody></table>
+                    <h4>Success 200</h4>
+                    <table class="table">
+                        <tbody><tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>content</td>
+                            <td>List&lt;Workflow&gt;</td>
+                            <td>The workflows returned as per <a href="https://kclhi.org/phenoflow/apidocs#workflowDetails">Get Workflow Details</a></td>
+                        </tr>
+                        <tr>
+                            <td>last</td>
+                            <td>Boolean</td>
+                            <td>Whether this page is the last one</td>
+                        </tr>
+                        <tr>
+                            <td>totalElements</td>
+                            <td>Integer</td>
+                            <td>The total number of workflows</td>
+                        </tr>
+                        <tr>
+                            <td>totalPages</td>
+                            <td>Integer</td>
+                            <td>The total number of pages of this size</td>
+                        </tr>
+                        <tr>
+                            <td>first</td>
+                            <td>Boolean</td>
+                            <td>Whether this page is the first one</td>
+                        </tr>
+                        <tr>
+                            <td>numberOfElements</td>
+                            <td>Integer</td>
+                            <td>The number of workflows on this page</td>
+                        </tr>
+                        <tr>
+                            <td>size</td>
+                            <td>Integer</td>
+                            <td>The page size requested</td>
+                        </tr>
+                        <tr>
+                            <td>number</td>
+                            <td>Integer</td>
+                            <td>The current page number</td>
+                        </tr>
+                    </tbody></table>
+                    <h5>Example Response</h5>
+<pre class="highlight json hljs">{
+    <span class="hljs-attr">"content"</span>: [
+        {
+
+        },
+        {
+
+        }
+    ],
+    <span class="hljs-attr">"last"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"totalElements"</span>: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">"totalPages"</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">"sort"</span>: <span class="hljs-literal">null</span>,
+    <span class="hljs-attr">"first"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"numberOfElements"</span>: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">"size"</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-attr">"number"</span>: <span class="hljs-number">0</span>
+}
+</pre>
+
+                    <h2 id="queue">Queue</h2>
+
+                    <h3>Check Queue Element</h3>
+                    <span class="method get">GET</span>
+                    <pre>/queue/:id</pre>
+                    <h4>Parameters</h4>
+                    <table class="table">
+                        <tbody><tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>id</td>
+                            <td>String</td>
+                            <td>The ID of the queue element from the Location header of <a href="https://kclhi.org/phenoflow/apidocs#addWorkflow">Add a new Workflow</a></td>
+                        </tr>
+                    </tbody></table>
+
+                    <h4>Pending 200</h4>
+                    <table class="table">
+                        <tbody><tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>cwltoolStatus</td>
+                            <td>enum</td>
+                            <td>One of RUNNING, ERROR</td>
+                        </tr>
+                        <tr>
+                            <td>cwltoolVersion</td>
+                            <td>String</td>
+                            <td>The version of cwltool being used to parse the workflow</td>
+                        </tr>
+                        <tr>
+                            <td>message</td>
+                            <td>String</td>
+                            <td>Error message if cwltoolStatus is ERROR</td>
+                        </tr>
+                    </tbody></table>
+                    <h5>Example Responses</h5>
+<pre class="highlight json hljs">{
+    <span class="hljs-attr">"cwltoolStatus"</span>: <span class="hljs-string">"RUNNING"</span>,
+    <span class="hljs-attr">"cwltoolVersion"</span>: <span class="hljs-string">"1.0.20170622090721"</span>,
+}
+</pre>
+<pre class="highlight json hljs">{
+    <span class="hljs-attr">"cwltoolStatus"</span>: <span class="hljs-string">"ERROR"</span>,
+    <span class="hljs-attr">"cwltoolVersion"</span>: <span class="hljs-string">"1.0.20170622090721"</span>,
+    <span class="hljs-attr">"message"</span>: <span class="hljs-string">"Tool definition failed initialization:\n('https://sparql-test.commonwl.org/schema.rdf', SSLError(SSLError(CertificateError(\"hostname 'sparql-test.commonwl.org' doesn't match either of 'biowardrobe.com', 'demo.biowardrobe.com', 'www.biowardrobe.com'\",),),))\n"</span>
+}
+</pre>
+
+                    <h4>Finished 303</h4>
+<pre class="highlight http hljs">HTTP/1.1 <span class="hljs-number">303</span> See Other
+<span class="hljs-attribute">Location</span>: /workflows/:url
+</pre>
+
+                    <h2>Examples</h2>
+                    <h3>Python - Build script for <a href="https://travis-ci.org/">Travis</a></h3>
+                    <p>The API can be utilised as a build step in continuous integration such as in the following example</p>
+                    <h4>travis.yml</h4>
+                    <p>The python script can be included in the 'script' or 'after_success' areas of travis.yml depending on your usage</p>
+<pre class="highlight yaml hljs"><span class="hljs-attr">language:</span> <span class="hljs-string">python</span>
+
+<span class="hljs-attr">python:</span>
+<span class="hljs-bullet">  -</span> <span class="hljs-string">"2.7"</span>
+
+<span class="hljs-attr">install:</span>
+<span class="hljs-bullet">  -</span> <span class="hljs-string">pip</span> <span class="hljs-string">install</span> <span class="hljs-string">requests</span>
+
+<span class="hljs-attr">script:</span>
+<span class="hljs-bullet">  -</span> <span class="hljs-string">...</span>
+
+<span class="hljs-attr">after_success:</span>
+<span class="hljs-bullet">  -</span> <span class="hljs-string">python</span> <span class="hljs-string">cwlviewer.py</span>
+</pre>
+                    <h4>cwlviewer.py</h4>
+<pre class="highlight python hljs"><span class="hljs-comment"># Must list 'pip install requests' in travis.yml</span>
+<span class="hljs-keyword">import</span> requests
+<span class="hljs-keyword">import</span> time
+<span class="hljs-keyword">import</span> os
+
+<span class="hljs-comment"># You can alternatively define these in travis.yml as env vars or arguments</span>
+BASE_URL = <span class="hljs-string">'https://view.commonwl.org'</span>
+WORKFLOW_PATH = <span class="hljs-string">'/workflows/workflow.cwl'</span>
+
+<span class="hljs-comment"># Travis environment variables</span>
+TRAVIS_COMMIT = os.getenv(<span class="hljs-string">'TRAVIS_COMMIT'</span>)
+TRAVIS_REPO_SLUG = os.getenv(<span class="hljs-string">'TRAVIS_REPO_SLUG'</span>)
+
+<span class="hljs-comment"># Whole workflow URL on github</span>
+workflowURL = <span class="hljs-string">'https://github.com/'</span> + TRAVIS_REPO_SLUG + <span class="hljs-string">'/blob/'</span> + TRAVIS_COMMIT + WORKFLOW_PATH
+
+<span class="hljs-comment"># Headers</span>
+HEADERS = {
+    <span class="hljs-string">'user-agent'</span>: <span class="hljs-string">'my-app/0.0.1'</span>,
+    <span class="hljs-string">'accept'</span>: <span class="hljs-string">'application/json'</span>
+}
+
+<span class="hljs-comment"># Add new workflow with the specific commit ID of this build</span>
+addResponse = requests.post(BASE_URL + <span class="hljs-string">'/workflows'</span>,
+                            data={<span class="hljs-string">'url'</span>: workflowURL},
+                            headers=HEADERS)
+
+<span class="hljs-keyword">if</span> addResponse.status_code == requests.codes.accepted:
+    qLocation = addResponse.headers[<span class="hljs-string">'location'</span>]
+
+    <span class="hljs-comment"># Get the queue item until success</span>
+    qResponse = requests.get(BASE_URL + qLocation,
+                             headers=HEADERS,
+                             allow_redirects=<span class="hljs-keyword">False</span>)
+    maxAttempts = <span class="hljs-number">5</span>
+    <span class="hljs-keyword">while</span> qResponse.status_code == requests.codes.ok <span class="hljs-keyword">and</span> qResponse.json()[<span class="hljs-string">'cwltoolStatus'</span>] == <span class="hljs-string">'RUNNING'</span> <span class="hljs-keyword">and</span> maxAttempts &gt; <span class="hljs-number">0</span>:
+        time.sleep(<span class="hljs-number">5</span>)
+        qResponse = requests.get(BASE_URL + qLocation,
+                                 headers=HEADERS,
+                                 allow_redirects=<span class="hljs-keyword">False</span>)
+        maxAttempts -= <span class="hljs-number">1</span>
+
+    <span class="hljs-keyword">if</span> qResponse.headers[<span class="hljs-string">'location'</span>]:
+        <span class="hljs-comment"># Success, get the workflow</span>
+        workflowResponse = requests.get(BASE_URL + qResponse.headers[<span class="hljs-string">'location'</span>], headers=HEADERS)
+        <span class="hljs-keyword">if</span> (workflowResponse.status_code == requests.codes.ok):
+            workflowJson = workflowResponse.json()
+            <span class="hljs-comment"># Do what you want with the workflow JSON</span>
+            <span class="hljs-comment"># Include details in documentation files etc</span>
+            print(BASE_URL + workflowJson[<span class="hljs-string">'visualisationSvg'</span>])
+            print(<span class="hljs-string">'Verified with cwltool version '</span> + workflowJson[<span class="hljs-string">'cwltoolVersion'</span>])
+            <span class="hljs-comment"># etc...</span>
+        <span class="hljs-keyword">else</span>:
+            print(<span class="hljs-string">'Could not get returned workflow'</span>)
+    <span class="hljs-keyword">elif</span> qResponse.json()[<span class="hljs-string">'cwltoolStatus'</span>] == <span class="hljs-string">'ERROR'</span>:
+        <span class="hljs-comment"># Cwltool failed to run here</span>
+        print(qResponse.json()[<span class="hljs-string">'message'</span>])
+    <span class="hljs-keyword">elif</span> maxAttempts == <span class="hljs-number">0</span>:
+        print(<span class="hljs-string">'Timeout: Cwltool did not finish'</span>)
+
+<span class="hljs-keyword">else</span>:
+    print(<span class="hljs-string">'Error adding workflow'</span>)
+</pre>
+
+
+                    <h3 id="graphSvg">SVG sketch of CWL workflow</h3>
+                    <div class="alert alert-info"><strong>Note:</strong> This method uses a brief YAML
+                    parsing of the standalone CWL file that does not support annotations
+                    like <kbd>label</kbd> or <kbd>doc</kbd>, and that does not check 
+                    for validity or completeness.
+                    </div>
+                    <span class="method post">POST</span>
+                    <pre>/graph/svg</pre>                    
+                    <h4>Input</h4>
+<pre class="highlight http hljs"><span class="hljs-attribute">Content-Type</span>: text/yaml
+</pre>
+<pre class="highlight yaml hljs"><span class="hljs-comment">#!/usr/bin/env cwl-runner</span>
+  
+<span class="hljs-attr">cwlVersion:</span> <span class="hljs-string">v1.0</span>
+<span class="hljs-attr">class:</span> <span class="hljs-string">Workflow</span>
+
+<span class="hljs-attr">inputs:</span>
+<span class="hljs-attr">  usermessage:</span> <span class="hljs-string">string</span>
+
+<span class="hljs-attr">outputs:</span>
+<span class="hljs-attr">  response:</span>
+<span class="hljs-attr">    outputSource:</span> <span class="hljs-string">step0/response</span>
+<span class="hljs-attr">    type:</span> <span class="hljs-string">File</span>
+
+<span class="hljs-attr">steps:</span>
+<span class="hljs-attr">  step0:</span>
+<span class="hljs-attr">    run:</span>
+<span class="hljs-attr">      class:</span> <span class="hljs-string">CommandLineTool</span>
+<span class="hljs-attr">      inputs:</span>
+<span class="hljs-attr">        message:</span>
+<span class="hljs-attr">          type:</span> <span class="hljs-string">string</span>
+<span class="hljs-attr">          inputBinding:</span>
+<span class="hljs-attr">            position:</span> <span class="hljs-number">1</span>
+<span class="hljs-attr">      baseCommand:</span> <span class="hljs-string">echo</span>
+<span class="hljs-attr">      outputs:</span>
+<span class="hljs-attr">        response:</span>
+<span class="hljs-attr">          type:</span> <span class="hljs-string">stdout</span>
+<span class="hljs-attr">    in:</span>
+<span class="hljs-attr">      message:</span> <span class="hljs-string">usermessage</span>
+<span class="hljs-attr">    out:</span> <span class="hljs-string">[response]</span>
+</pre>
+<h4>Output</h4>
+<p><samp>Content-Type: image/svg+xml</samp></p>
+<pre class="highlight xml hljs"><span class="php"><span class="hljs-meta">&lt;?</span>xml version=<span class="hljs-string">"1.0"</span> encoding=<span class="hljs-string">"UTF-8"</span> standalone=<span class="hljs-string">"no"</span><span class="hljs-meta">?&gt;</span></span>
+<span class="hljs-meta">&lt;!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">svg</span> <span class="hljs-attr">width</span>=<span class="hljs-string">"450pt"</span> <span class="hljs-attr">height</span>=<span class="hljs-string">"270pt"</span>
+     <span class="hljs-attr">viewBox</span>=<span class="hljs-string">"0.00 0.00 463.00 278.00"</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://www.w3.org/2000/svg"</span>&gt;</span>
+	<span class="hljs-comment">&lt;!-- ... --&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span>
+</pre>
+                    <h4>Success</h4>
+<pre class="highlight http hljs">HTTP/1.1 <span class="hljs-number">200</span> OK
+<span class="hljs-attribute">Content-Type</span>: image/svg+xml
+</pre>
+                    <h4>Error</h4>
+                    <pre class="highlight http hljs">HTTP/1.1 <span class="hljs-number">400</span> Bad Request</pre>
+
+
+                    <h3 id="graphPng">PNG sketch of CWL workflow</h3>
+                    <div class="alert alert-info"><strong>Note:</strong> This method uses a brief YAML
+                    parsing of the standalone CWL file that does not support annotations
+                    like <kbd>label</kbd> or <kbd>doc</kbd>, and that does not check 
+                    for validity or completeness.
+                    </div>
+                    <span class="method post">POST</span>
+                    <pre>/graph/png</pre>                    
+                    <h4>Input</h4>
+
+<pre class="highlight http hljs"><span class="hljs-attribute">Content-Type</span>: text/yaml
+</pre>
+<pre class="highlight yaml hljs"><span class="hljs-comment">#!/usr/bin/env cwl-runner</span>
+  
+<span class="hljs-attr">cwlVersion:</span> <span class="hljs-string">v1.0</span>
+<span class="hljs-attr">class:</span> <span class="hljs-string">Workflow</span>
+
+<span class="hljs-attr">inputs:</span>
+<span class="hljs-attr">  usermessage:</span> <span class="hljs-string">string</span>
+
+<span class="hljs-attr">outputs:</span>
+<span class="hljs-attr">  response:</span>
+<span class="hljs-attr">    outputSource:</span> <span class="hljs-string">step0/response</span>
+<span class="hljs-attr">    type:</span> <span class="hljs-string">File</span>
+
+<span class="hljs-attr">steps:</span>
+<span class="hljs-attr">  step0:</span>
+<span class="hljs-attr">    run:</span>
+<span class="hljs-attr">      class:</span> <span class="hljs-string">CommandLineTool</span>
+<span class="hljs-attr">      inputs:</span>
+<span class="hljs-attr">        message:</span>
+<span class="hljs-attr">          type:</span> <span class="hljs-string">string</span>
+<span class="hljs-attr">          inputBinding:</span>
+<span class="hljs-attr">            position:</span> <span class="hljs-number">1</span>
+<span class="hljs-attr">      baseCommand:</span> <span class="hljs-string">echo</span>
+<span class="hljs-attr">      outputs:</span>
+<span class="hljs-attr">        response:</span>
+<span class="hljs-attr">          type:</span> <span class="hljs-string">stdout</span>
+<span class="hljs-attr">    in:</span>
+<span class="hljs-attr">      message:</span> <span class="hljs-string">usermessage</span>
+<span class="hljs-attr">    out:</span> <span class="hljs-string">[response]</span>
+</pre>
+
+<h4>Output</h4>
+
+<pre class="highlight hljs taggerscript"><span class="hljs-symbol">\x</span>89PNG<span class="hljs-symbol">\n</span><span class="hljs-symbol">\x</span>1a<span class="hljs-symbol">\n</span><span class="hljs-symbol">\x</span>00<span class="hljs-symbol">\x</span>00 (binary)
+</pre>
+                    <h4>Success</h4>
+<pre class="highlight http hljs">HTTP/1.1 <span class="hljs-number">200</span> OK
+<span class="hljs-attribute">Content-Type</span>: image/png
+</pre>
+                    <h4>Error</h4>
+                    <pre class="highlight http hljs">HTTP/1.1 <span class="hljs-number">400</span> Bad Request</pre>
+
+
+
+                </div>
+            </div>
+        </div>
+<!-- Base API -->
+
+
+
+
+        
+        <div id="footer" class="container">
+        <div class="row">
+            <hr>
+            <div class="col-lg-12 muted text-center">
+                <a href="https://github.com/phenoflow" rel="noopener" target="_blank">Phenoflow</a>
+                © 2020-2025 <a href="https://kclhi.org/" rel="noopener" target="_blank">kclhi</a>
+                and <a href="https://martinchapman.co.uk/teaching#students" rel="noopener" target="_blank">contributors</a>. View <a href="https://web.archive.org/web/20230330102337/https://kclhi.org/phenoflow/">original library</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 muted text-center">
+                <a href="https://github.com/common-workflow-language/cwlviewer" rel="noopener" target="_blank">CWL Viewer</a>
+                © 2016-2022 <a href="https://www.commonwl.org/" rel="noopener" target="_blank">Common Workflow Language Project</a>
+                and <a href="https://github.com/orgs/common-workflow-language/people" rel="noopener" target="_blank">contributors</a>.
+                Distributed under <a href="https://www.apache.org/licenses/LICENSE-2.0" rel="noopener" target="_blank">Apache License, version 2.0</a>
+                (required <a href="https://github.com/common-workflow-language/cwlviewer/blob/master/NOTICE.md" rel="noopener" target="_blank">attribution notices</a>).                
+               	<br>
+                
+                (<a href="about.html#privacy">Privacy policy</a>)
+            </div>
+        </div>
+        <div class="row logos">
+          <div class="col-lg-12 muted text-center">
+            <a href="https://kcl.ac.uk/" rel="noopener" target="_blank"><img src="./files/kcl.png" alt="King&#39;s College London"></a>
+            <a href="https://kclhi.org/" rel="noopener" target="_blank"><img src="./files/kclhi.png" alt="King&#39;s College London Health Informatics"></a>
+            <a href="https://www.hdruk.ac.uk/" rel="noopener" target="_blank"><img src="./files/hdruk.png" alt="Health Data Research UK"></a>
+          </div>
+        </div>
+        <div class="row logos">
+          <div class="col-lg-12 muted text-center">
+            <a href="https://www.commonwl.org/" rel="noopener" target="_blank"><img src="./files/CWL-Logo-nofonts.svg" alt="Common Workflow Language"></a>
+            <a href="https://www.esciencelab.org.uk/" rel="noopener" target="_blank"><img src="./files/manchester.svg" alt="The University of Manchester" title="eScienceLab, School of Computer Science, The University of Manchester"></a>
+            <a href="https://bioexcel.eu/" rel="noopener" target="_blank"><img src="./files/BioExcel_logo_cropped.svg" alt="BioExcel" title="BioExcel Center of Excellence for Computational Biomolecular Research"></a>
+            <a href="https://cordis.europa.eu/projects/675728" rel="noopener" target="_blank"><img src="./files/Flag_of_Europe.svg" alt="EU" title="European Commision grant 675728"></a>
+            <a href="https://hpc4ai.unito.it/" rel="noopener" target="_blank"><img src="./files/hpc4ai-logo.webp" alt="HPC4AI" title="HPC4AI competence centre, University of Turin"></a>
+          </div>
+        </div>
+    </div>
+
+        <script src="./files/require.js.descarga"></script>
+    
+
+</body></html>
