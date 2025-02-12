@@ -41,7 +41,7 @@ const path = require('path');
  *               name:
  *                 type: string
  *                 description: The name of the new definition
- *                 example: lr001
+ *                 example: rfc001
  *               about:
  *                 type: string
  *                 description: A description of the new definition

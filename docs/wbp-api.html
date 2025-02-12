@@ -2,12 +2,58 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>API Documentation - Common Workflow Language Viewer</title>
+        <title>Phenoflow-ML documentation</title>
         <link rel="stylesheet" href="./files/bootstrap.min.css">
         <link rel="stylesheet" href="./files/github.css">
         <link rel="stylesheet" type="text/css" href="./files/main-20180518.css">
-    <script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="docs" src="./files/docs.js.descarga"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="jquery" src="./files/jquery.min.js.descarga"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="highlight" src="./files/highlight.pack.min.js.descarga"></script></head>
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.24.2/swagger-ui.css" >
+        <style>
+          html
+          {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+          }
+          *,
+          *:before,
+          *:after
+          {
+            box-sizing: inherit;
+          }
+          body {
+            margin:0;
+            background: #fafafa;
+          }
+        </style>
+        <script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="docs" src="./files/docs.js.descarga"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="jquery" src="./files/jquery.min.js.descarga"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="highlight" src="./files/highlight.pack.min.js.descarga"></script></head>
     <body>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.24.2/swagger-ui-bundle.js"> </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.24.2/swagger-ui-standalone-preset.js"> </script>
+<script>
+    window.onload = function() {
+      var spec = {"openapi": "3.0.0", "info": {"title": "API for Workflow-based phenotyping", "version": "1.0.0"}, "paths": {"/phenoflow/login": {"post": {"summary": "Authenticate", "tags": ["Authentication"], "description": "Retrieve a token to use against restricted Phenoflow API endpoints.", "requestBody": {"required": false, "content": {"application/json": {"schema": {"type": "object", "properties": {"user": {"type": "string", "description": "user", "example": "martinchapman"}, "password": {"type": "string", "description": "password", "example": "password"}}}}}}, "responses": {"200": {"description": "Authentication token to send with subsequent requests"}}}}, "/phenoflow/phenotype/all": {"post": {"summary": "List phenotypes", "tags": ["Phenotype"], "description": "Retrieve a list of all phenotypes, or phenotypes matching the given criteria", "requestBody": {"required": false, "content": {"application/json": {"schema": {"type": "object", "properties": {"importedId": {"type": "string", "description": "The ID grabbed from the import source. Often listed as a part of a definition's description.", "example": "XNIlg0YihF3u3iuI6IitMu0CNfQ"}, "name": {"type": "string", "description": "Phenotype name", "example": "Rheumatoid arthritis"}}}}}}, "responses": {"200": {"description": "A list of phenotypes"}}}}, "/phenoflow/phenotype/generate/{phenotypeId}": {"post": {"summary": "Generate a computable phenotype", "tags": ["Phenotype"], "description": "Generate a CWL workflow based on a phenotype definition", "parameters": [{"in": "path", "name": "phenotypeId", "required": true, "description": "ID of the phenotype to generate", "schema": {"type": "integer"}}], "responses": {"200": {"description": "An executable workflow"}}}}, "/phenoflow/importer/importCodelists": {"post": {"summary": "Import a set of codelists", "tags": ["Importer"], "description": "Create a phenotype definitions based upon a collection of codelists", "requestBody": {"required": true, "content": {"multipart/form-data": {"schema": {"type": "object", "properties": {"csvs": {"type": "string", "description": "A zipped folder containing a collection of codelists as CSVs", "format": "binary"}, "name": {"type": "string", "description": "The name of the new definition", "example": "Diabetes"}, "about": {"type": "string", "description": "A description of the new definition", "example": "Diabetes phenotype developed at KCL"}, "userName": {"type": "string", "description": "the name of a pre-registered author to whom the definition should be attributed", "example": "martinchapman"}}}}}}, "responses": {"200": {"description": "Definition added."}}}}, "/phenoflow/importer/importKeywordList": {"post": {"summary": "Import a list of keywords", "tags": ["Importer"], "description": "Create a phenotype definitions based upon a list of keywords", "requestBody": {"required": true, "content": {"multipart/form-data": {"schema": {"type": "object", "properties": {"keywords": {"type": "string", "description": "A CSV file listing keywords", "format": "binary"}, "name": {"type": "string", "description": "The name of the new definition", "example": "Diabetes"}, "about": {"type": "string", "description": "A description of the new definition", "example": "Diabetes phenotype developed at KCL"}, "userName": {"type": "string", "description": "the name of a pre-registered author to whom the definition should be attributed", "example": "martinchapman"}}}}}}, "responses": {"200": {"description": "Definition added"}}}}, "/phenoflow/importer/importSteplist": {"post": {"summary": "Import a steplist", "tags": ["Importer"], "description": "Create a phenotype definitions based upon a list of steps", "requestBody": {"required": true, "content": {"multipart/form-data": {"schema": {"type": "object", "properties": {"steplist": {"type": "string", "description": "The list of steps, as a file formatted according to the Phenoflow import standard", "format": "binary"}, "csvs": {"type": "string", "description": "A zipped folder containing a collection of the CSVs referenced in the steplist, including branches (and their CSVs)", "format": "binary"}, "name": {"type": "string", "description": "The name of the new definition", "example": "Diabetes"}, "about": {"type": "string", "description": "A description of the new definition", "example": "Diabetes phenotype developed at KCL"}, "userName": {"type": "string", "description": "the name of a pre-registered author to whom the definition should be attributed", "example": "martinchapman"}}}}}}, "responses": {"200": {"description": "Definition added"}}}}, "/phenoflow/importer/addConnector": {"post": {"summary": "Add a new connector", "tags": ["Importer"], "description": "Add a new connector to an existing phenotype definition", "requestBody": {"required": true, "content": {"multipart/form-data": {"schema": {"type": "object", "properties": {"implementationTemplate": {"type": "string", "format": "binary"}, "existingWorkflowIds": {"type": "array", "description": "The IDs of the workflows to which to add the new connector (single values also accepted for individual workflows)", "example": [1, 2]}, "dataSource": {"type": "string", "description": "A description of the data source targeted by the connector", "example": "FHIR"}, "language": {"type": "string", "description": "The language in which the connector has been developed", "example": "python, js or KNIME"}}}}}}, "responses": {"200": {"description": "Connector added"}}}}}};
+      const ui = SwaggerUIBundle({
+        spec: spec,
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout"
+      })
+      window.ui = ui
+    
+      var elements = document.getElementsByClassName("download-url-wrapper");
+      while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+      }
+    }
+    </script>
 
         <nav class="navbar navbar-default navbar-fixed-top">
             <div class="container">
@@ -33,81 +79,9 @@
 
 
 <!-- WBP API -->
-<div class="container">
-    <div class="row">
-        <div class="col-md-12" role="main" id="main">
-
-
-
-
-<h2>Phenotype</h2>
-
-
-
-<!-- ### -->
-<h3 id="getWorkflow">Search for an imported phenotype (Workflow)</h3>
-<span class="method post">POST</span>
-<pre>/phenoflow/phenotype/all</pre>
-<h4>Parameters</h4>
-<table class="table">
-    <tbody><tr>
-        <th>Field</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    <tr>
-        <td>importedId</td>
-        <td>String</td>
-        <td>The original ID associated with the source phenotype that has been imported as a Workflow into Phenoflow (e.g. 'PH222', HDR UK Phenotype Library)</td>
-    </tr>
-</tbody></table>
-<h4>Input</h4>
-<pre class="highlight json hljs">{
-<span class="hljs-attr">"importedId"</span>: <span class="hljs-string">"PH222"</span>
-}</pre>
-<h4>Success</h4>
-<table class="table">
-    <tbody><tr>
-        <th>Field</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    <tr>
-        <td>github_url</td>
-        <td>String</td>
-        <td>A link to the Workflow source of the imported phenotype on GitHub</td>
-    </tr>
-    <tr>
-        <td>url</td>
-        <td>String</td>
-        <td>A link to a visualisation of the imported phenotype on Phenoflow</td>
-    </tr>
-    <tr>
-        <td>short_url</td>
-        <td>String</td>
-        <td>A shorthand link to a visualisation of the imported phenotype on Phenoflow. NB. although potentially easier to work with, this link makes assumptions about the nature of the Workflow that may not hold.</td>
-    </tr>
-</tbody></table>
-<pre class="highlight json hljs">HTTP/<span class="hljs-number">1.1</span> <span class="hljs-number">200</span> OK
-{
-<span class="hljs-attr">"github_url"</span>:<span class="hljs-string">"https://github.com/phenoflow/Obstructive-and-reflux-uropathy---e0e470b0-1798-11ef-9de4-4d4ea830ad16"</span>,
-<span class="hljs-attr">"url"</span>:<span class="hljs-string">"https://kclhi.org/phenoflow/workflows/github.com/phenoflow/Obstructive-and-reflux-uropathy---e0e470b0-1798-11ef-9de4-4d4ea830ad16/blob/read-potential-cases-fhir/Obstructive-and-reflux-uropathy.cwl"</span>,
-<span class="hljs-attr">"short_url"</span>:<span class="hljs-string">"https://kclhi.org/phenoflow/Obstructive-and-reflux-uropathy---e0e470b0-1798-11ef-9de4-4d4ea830ad16"</span>
-}</pre>
-<h4>Error</h4>
-<pre class="highlight http hljs">HTTP/1.1 <span class="hljs-number">404</span> Not Found</pre>
-<!-- ### -->
-
-
-</div>
-</div>
-</div>
+<div id="swagger-ui"></div>
 <!-- WBP API -->
 
-
-
-
-        
         <div id="footer" class="container">
         <div class="row">
             <hr>
