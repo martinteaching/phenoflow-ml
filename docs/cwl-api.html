@@ -14,21 +14,21 @@
                 <div class="navbar-header">
                     <a href="extending.html" class="button navbar-toggle">Extending Phenoflow-ML</a>
                     <a href="ml-api.html" class="button navbar-toggle">API for ML-based phenotyping</a>
-                    <a href="cwl-api.html" class="button navbar-toggle">API for Workflow-based phenotyping</a>
+                    <a href="wbp-api.html" class="button navbar-toggle">API for Workflow-based phenotyping</a>
+                    <a href="cwl-api.html" class="button navbar-toggle">Basic CWL API</a>
                     <a href="about.html" class="button navbar-toggle">About</a>
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-right">
                         <li><a href="about.html">About</a></li>
-                        <li><a href="cwl-api.html">API for Workflow-based phenotyping</a></li>
+                        <li><a href="cwl-api.html">Basic CWL API</a></li>
+                        <li><a href="wbp-api.html">API for Workflow-based phenotyping</a></li>
                         <li><a href="ml-api.html">API for ML-based phenotyping</a></li>
                         <li><a href="extending.html">Extending Phenoflow-ML</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
-
-
 
 <!-- Base API -->
         <div class="container">
@@ -44,58 +44,6 @@
                     <p></p>
 
                     <h2>Workflow</h2>
-
-                    <h3 id="getWorkflow">Search for an imported phenotype (Workflow)</h3>
-                    <span class="method post">POST</span>
-                    <pre>/phenoflow/phenotype/all</pre>
-                    <h4>Parameters</h4>
-                    <table class="table">
-                        <tbody><tr>
-                            <th>Field</th>
-                            <th>Type</th>
-                            <th>Description</th>
-                        </tr>
-                        <tr>
-                            <td>importedId</td>
-                            <td>String</td>
-                            <td>The original ID associated with the source phenotype that has been imported as a Workflow into Phenoflow (e.g. 'PH222', HDR UK Phenotype Library)</td>
-                        </tr>
-                    </tbody></table>
-                    <h4>Input</h4>
-<pre class="highlight json hljs">{
-    <span class="hljs-attr">"importedId"</span>: <span class="hljs-string">"PH222"</span>
-}</pre>
-                    <h4>Success</h4>
-                    <table class="table">
-                        <tbody><tr>
-                            <th>Field</th>
-                            <th>Type</th>
-                            <th>Description</th>
-                        </tr>
-                        <tr>
-                            <td>github_url</td>
-                            <td>String</td>
-                            <td>A link to the Workflow source of the imported phenotype on GitHub</td>
-                        </tr>
-                        <tr>
-                            <td>url</td>
-                            <td>String</td>
-                            <td>A link to a visualisation of the imported phenotype on Phenoflow</td>
-                        </tr>
-                        <tr>
-                            <td>short_url</td>
-                            <td>String</td>
-                            <td>A shorthand link to a visualisation of the imported phenotype on Phenoflow. NB. although potentially easier to work with, this link makes assumptions about the nature of the Workflow that may not hold.</td>
-                        </tr>
-                    </tbody></table>
-<pre class="highlight json hljs">HTTP/<span class="hljs-number">1.1</span> <span class="hljs-number">200</span> OK
-{
-    <span class="hljs-attr">"github_url"</span>:<span class="hljs-string">"https://github.com/phenoflow/Obstructive-and-reflux-uropathy---e0e470b0-1798-11ef-9de4-4d4ea830ad16"</span>,
-    <span class="hljs-attr">"url"</span>:<span class="hljs-string">"https://kclhi.org/phenoflow/workflows/github.com/phenoflow/Obstructive-and-reflux-uropathy---e0e470b0-1798-11ef-9de4-4d4ea830ad16/blob/read-potential-cases-fhir/Obstructive-and-reflux-uropathy.cwl"</span>,
-    <span class="hljs-attr">"short_url"</span>:<span class="hljs-string">"https://kclhi.org/phenoflow/Obstructive-and-reflux-uropathy---e0e470b0-1798-11ef-9de4-4d4ea830ad16"</span>
-}</pre>
-                    <h4>Error</h4>
-                    <pre class="highlight http hljs">HTTP/1.1 <span class="hljs-number">404</span> Not Found</pre>
 
                     <h3 id="addWorkflow">Add a new Workflow</h3>
                     <div class="alert alert-info"><strong>Note:</strong> Due to cwltool run times, the creation of workflows is done asynchronously and an intermediate <a href="https://kclhi.org/phenoflow/apidocs#queue">queue resource</a> is used</div>
