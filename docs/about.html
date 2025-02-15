@@ -30,6 +30,7 @@
             </div>
         </nav>
 
+        <!-- Content -->
         <div class="container">
             <div class="row">
                 <div class="col-md-12" role="main" id="main">
@@ -47,11 +48,13 @@
         
                     <p>Cite as: <code><a href="https://pubmed.ncbi.nlm.nih.gov/34457128">Phenoflow: A Microservice Architecture for Portable Workflow-based Phenotype Definitions (2021). Martin Chapman, Luke V Rasmussen, Jennifer A Pacheco, Vasa Curcin</a></code></p>
                     
-                    <p>However, a relevant limitation of the state-of-the-art tools for computable phenotype generation is the lack of support for phenotypes based on machine learning (i.e., ML-based phenotypes).</p>
+                    <p>However, a relevant limitation of the initial version of Phenoflow and other state-of-the-art tools for computable phenotype generation is the lack of support for phenotypes based on machine learning (i.e., ML-based phenotypes).</p>
 
-                    <p>To overcome this limitation, Phenoflow-ML adds powerful and novel capabilities for ML-based phenotyping to Phenoflow. The general architecture of Phenoflow-ML is shown as follows:</p>
+                    <p>To overcome this limitation, Phenoflow-ML adds powerful and novel capabilities for ML-based phenotyping to Phenoflow. Phenoflow-ML is formed of three components (web, generator and visualiser) and its general architecture is shown as follows:</p>
 
                     <p><img src="./files/architecture.png" alt="Phenoflow-ML architecture" width="47%"></p>
+
+                    <p>New types of ML-based phenotypes (e.g., Trace-based Clustering, Logistic Regression, Random Forest, etc.) can be included in Phenoflow-ML (see <a href="extending.html">Extending Phenoflow-ML</a>), from which ML-based phenotype definitions can be created. These definitions are instances of types of ML-based phenotype with specific initial parameters.</p>
 
                     <h2>CWL Viewer</h2>
         
@@ -303,15 +306,12 @@
                 </div>
             </div>
         </div>
+        <!-- Content -->
 
-
-
-        
         <div id="footer" class="container">
         <div class="row">
             <hr>
             <div class="col-lg-12 muted text-center">
-                <a href="https://github.com/phenoflow" rel="noopener" target="_blank">Phenoflow</a>
                 © 2020-2025 <a href="https://kclhi.org/" rel="noopener" target="_blank">kclhi</a>
                 and <a href="https://martinchapman.co.uk/teaching#students" rel="noopener" target="_blank">contributors</a>. View <a href="https://web.archive.org/web/20230330102337/https://kclhi.org/phenoflow/">original library</a>
             </div>
