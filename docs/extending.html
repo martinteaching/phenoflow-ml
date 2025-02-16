@@ -43,6 +43,12 @@
 
             <h2>The templates</h2>
 
+            <p>Each specific ML-based phenotype definition is compounded by a set of files (python files, cwl files, datasets, etc.), which contain the specific initial parameters with which the phenotype definition was created. This creation process is carried out by using templates already stored in the system.</p>
+
+            <p>The first step to creating the new templates is to copy the directory <code>/src/web/templates/LogisticRegression</code> to <code>/src/web/templates/DecisionTreeClassifier</code>. The templates have been designed to be as generic as possible, meaning that we only have to modify two files: (a) <code>README.md</code>, and (b) <code>step2.py</code>.</p>
+
+            <p>The former file contains general information about the ML technique that is implemented (and the user can read). After modifying the text properly, this file would look like <a href="files/extending_dtc_readme_md.txt" target="_blank">this</a>. The latter file contains the Python code that executes the ML technique itself and it is, therefore, the most important file. Here, there are two relevant blocks of code: the <code>_params</code> dictionary (which contains the values of the initial parameters), and the call to the ML technique (that is different for each ML technique and uses the elements from the <code>_params</code> dictionary). After modifying the code properly, this file would look like <a href="files/extending_dtc_step2_py.txt" target="_blank">this</a>.</p>
+
             <h2>The endpoints of the generator component</h2>
 
             <h2>The endpoints of the web component</h2>
