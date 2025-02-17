@@ -51,14 +51,24 @@
 
             <h2>The endpoints of the generator component</h2>
 
-            <p>The generator component aims to create specific files in the proper format for each phenotype definition. For that, it uses the corresponding templates and makes the necessary substitutions according to the initial parameters given by the phenotype definition author.</p>
+            <p>The generator component aims to create specific files in the proper format for each phenotype definition (for which an API with different endpoints is provided). For that, it uses the corresponding templates and makes the necessary substitutions according to the initial parameters given by the phenotype definition author.</p>
 
-            <p>This functionality is implemented in the <code>src/generator/api/routes.py</code> file and every type of ML-based phenotype has the following endpoints: <code>getStepCwl</code>, which generates the content of the CWL file of a certain step, <code>getMainCwl</code>, which generates the content of the <code>main.cwl</code> file, and <code>generateMainYml</code>, which generates the content of the <code>main.yml</code> file.</p>
+            <p>This functionality is implemented in the <code>src/generator/api/routes.py</code> file and each type of ML-based phenotype has the following endpoints: <code>getStepCwl</code>, which generates the content of the CWL file of a certain step, <code>getMainCwl</code>, which generates the content of the <code>main.cwl</code> file, and <code>generateMainYml</code>, which generates the content of the <code>main.yml</code> file.</p>
 
-            <p>These endpoints have been designed to be as generic as possible, meaning that we only have to modify two things: (1) replace "LogisticRegression" with "DecisionTreeClassifier", and (2) replace "Logistic Regression" with "Decision Tree Classifier". After these changes, the new block of code, that must be added at the bottom of the file, would look like <a href="files/extending_dtc_generator_enpoints.txt" target="_blank">this</a>.</p>
+            <p>These endpoints have been designed to be as generic as possible, meaning that we only have to make a few modifications: (1) replace "LogisticRegression" with "DecisionTreeClassifier", and (2) replace "Logistic Regression" with "Decision Tree Classifier". After these changes, the new block of code, that must be added at the bottom of the file, would look like <a href="files/extending_dtc_generator_endpoints.txt" target="_blank">this</a>.</p>
             
-
             <h2>The endpoints of the web component</h2>
+
+            <p>The web component aims to offer different mechanisms (in the form of API endpoints) to create, delete and modify phenotype definitions. For that, it uses the endpoints of the generator API.</p>
+
+            <p>This functionality is implemented in the <code>src/web/routes</code> folder, in which each type of ML-based phenotype has a single file with the following endpoints: <code>addPhenotype</code>, which creates a new ML-based phenotype definition based on the parameters specified by the creator, <code>uploadCsvDataset</code>, which allows to upload a dataset in CSV format, and <code>generate</code>, which returns a zip file containing all the needed files to execute the phenotype definition.</p>
+
+            <p>Taking this into account, we have first to copy the file <code>src/web/routes/LogisticRegression.js</code> to <code>src/web/routes/DecisionTreeClassifier.js</code>. The aforementioned endpoints have been designed to be as generic as possible, meaning that we only have to make a few modifications: (1) replace "LogisticRegression" with "DecisionTreeClassifier", and (2) replace "Logistic Regression" with "Decision Tree Classifier". After these changes, the new file would look like <a href="files/extending_dtc_web_endpoints.txt" target="_blank">this</a>.</p>
+
+            <p>Finally, we also have to reference this new file in the <code>src/web/app.js</code> file. For that, the following two lines of code need to be added:</p>
+
+            <p><code>const DecisionTreeClassifier = require("./routes/DecisionTreeClassifier")</code></p>
+            <p><code>router.use("/DecisionTreeClassifier", DecisionTreeClassifier)</code></p>
 
         </div>
     </div>

@@ -45,7 +45,7 @@ const path = require('path');
  *               about:
  *                 type: string
  *                 description: A description of the new definition
- *                 example: A phenotype based on the Logisitc Regression technique with a random state equal to 5
+ *                 example: A phenotype based on the Support Vector Classification technique with a random state equal to 5
  *               userName:
  *                 type: string
  *                 description: The name of a pre-registered author to whom the definition should be attributed
@@ -330,10 +330,10 @@ router.post('/uploadCsvDataset', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), 
     if ( (req.body.replace.toLowerCase() !== "true") && (req.body.replace.toLowerCase() !== "false") ) {
         return res.status(500).send("Error: replace parameter is not valid (see documentation).")
     }
-    // Check whether the Trace-based clustering phenotype exists.
+    // Check whether the Support Vector Classification phenotype exists.
     // IMPORTANT: in this point, either no workflow of this type exists or only one exists.
-    // - Other workflows with the same name could exist, but they do not correspond to the Trace-based clustering technique (i.e., they were created using other endpoints).
-    //   ==> This case should not occur (USERS MUST NOT USE HERE A PHENOTYPE THAT IS NOT OF TRACE-BASED CLUSTERING TYPE) and, therefore, it is not handled.
+    // - Other workflows with the same name could exist, but they do not correspond to the Support Vector Classification technique (i.e., they were created using other endpoints).
+    //   ==> This case should not occur (USERS MUST NOT USE HERE A PHENOTYPE THAT IS NOT OF SUPPORT VECTOR CLASSIFICATION TYPE) and, therefore, it is not handled.
     try {
         var workflow = await models.workflow.findOne({where:{name:req.body.phenotypeName}});
         var workflow_id = workflow.id;

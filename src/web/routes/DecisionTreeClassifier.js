@@ -16,12 +16,12 @@ const path = require('path');
 
 /**
  * @swagger
- * /phenoflow/RandomForestClassifier/addPhenotype:
+ * /phenoflow/DecisionTreeClassifier/addPhenotype:
  *   post:
  *     security:
  *       - bearerAuth: []
- *     summary: Create a new Random Forest Classifier phenotype
- *     description: Create a phenotype definition based on the Random Forest Classifier technique (using the scikit-learn implementation).
+ *     summary: Create a new Decision Tree Classifier phenotype
+ *     description: Create a phenotype definition based on the Decision Tree Classifier technique (using the scikit-learn implementation).
  *     requestBody:
  *       required: true
  *       content:
@@ -41,11 +41,11 @@ const path = require('path');
  *               name:
  *                 type: string
  *                 description: The name of the new definition
- *                 example: rfc001
+ *                 example: dtc001
  *               about:
  *                 type: string
  *                 description: A description of the new definition
- *                 example: A phenotype based on the Random Forest Classifier technique with a random state equal to 5
+ *                 example: A phenotype based on the Decision Tree Classifier technique with a random state equal to 5
  *               userName:
  *                 type: string
  *                 description: The name of a pre-registered author to whom the definition should be attributed
@@ -142,7 +142,7 @@ router.post('/addPhenotype', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algo
         return res.status(500).send(error);
     }
     implementation_file_name = "step1.py"
-    source_implementation_file_path = "templates/RandomForestClassifier/" + implementation_file_name
+    source_implementation_file_path = "templates/DecisionTreeClassifier/" + implementation_file_name
     dest_implementation_file_path = implementation_files_folder_path + "/" + implementation_file_name
     try{
         source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
@@ -197,7 +197,7 @@ router.post('/addPhenotype', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algo
         return res.status(500).send(error);
     }
     implementation_file_name = "step2.py"
-    source_implementation_file_path = "templates/RandomForestClassifier/" + implementation_file_name
+    source_implementation_file_path = "templates/DecisionTreeClassifier/" + implementation_file_name
     dest_implementation_file_path = implementation_files_folder_path + "/" + implementation_file_name
     try{
         source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
@@ -258,7 +258,7 @@ router.post('/addPhenotype', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algo
         return res.status(500).send(error);
     }
     implementation_file_name = "step3.py"
-    source_implementation_file_path = "templates/RandomForestClassifier/" + implementation_file_name
+    source_implementation_file_path = "templates/DecisionTreeClassifier/" + implementation_file_name
     dest_implementation_file_path = implementation_files_folder_path + "/" + implementation_file_name
     try{
         source_file_content = await fs.readFile(source_implementation_file_path, "utf8")
@@ -292,7 +292,7 @@ router.post('/addPhenotype', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algo
 
 /**
  * @swagger
- * /phenoflow/RandomForestClassifier/uploadCsvDataset:
+ * /phenoflow/DecisionTreeClassifier/uploadCsvDataset:
  *   post:
  *     security:
  *       - bearerAuth: []
@@ -330,10 +330,10 @@ router.post('/uploadCsvDataset', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), 
     if ( (req.body.replace.toLowerCase() !== "true") && (req.body.replace.toLowerCase() !== "false") ) {
         return res.status(500).send("Error: replace parameter is not valid (see documentation).")
     }
-    // Check whether the Random Forest Classifier phenotype exists.
+    // Check whether the Decision Tree Classifier phenotype exists.
     // IMPORTANT: in this point, either no workflow of this type exists or only one exists.
-    // - Other workflows with the same name could exist, but they do not correspond to the Random Forest Classifier technique (i.e., they were created using other endpoints).
-    //   ==> This case should not occur (USERS MUST NOT USE HERE A PHENOTYPE THAT IS NOT OF RANDOM FOREST CLASSIFIER TYPE) and, therefore, it is not handled.
+    // - Other workflows with the same name could exist, but they do not correspond to the Decision Tree Classifier technique (i.e., they were created using other endpoints).
+    //   ==> This case should not occur (USERS MUST NOT USE HERE A PHENOTYPE THAT IS NOT OF DECISION TREE CLASSIFIER TYPE) and, therefore, it is not handled.
     try {
         var workflow = await models.workflow.findOne({where:{name:req.body.phenotypeName}});
         var workflow_id = workflow.id;
@@ -395,16 +395,16 @@ router.post('/uploadCsvDataset', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), 
 
 /**
  * @swagger
- * /phenoflow/RandomForestClassifier/generate/{workflowName}/{trainDatasetName}/{testDatasetName}:
+ * /phenoflow/DecisionTreeClassifier/generate/{workflowName}/{trainDatasetName}/{testDatasetName}:
  *   get:
- *     summary: Generate a Random Forest Classifier phenotype
- *     description: Generate a phenotype based on the Random Forest Classifier technique, indicanting and existing workflow/phenotype name and an existing train and test dataset names (including the extension)
+ *     summary: Generate a Decision Tree Classifier phenotype
+ *     description: Generate a phenotype based on the Decision Tree Classifier technique, indicanting and existing workflow/phenotype name and an existing train and test dataset names (including the extension)
  *     parameters:
  *       - in: path
  *         name: workflowName
  *         type: string
  *         required: true
- *         description: Name of the existing Random Forest Classifier phenotype
+ *         description: Name of the existing Decision Tree Classifier phenotype
  *       - in: path
  *         name: trainDatasetName
  *         type: string
@@ -429,7 +429,7 @@ router.get("/generate/:workflowName/:trainDatasetName/:testDatasetName", jwt({se
     // IMPORTANT: since it is a ML-based phenotype, in this point, either no workflow exists or only one exists.
     // - Other workflows with the same name could exist, but they do not correspond to the current ML technique (i.e., they were created using other endpoints).
     //   ==> This case should not occur and, therefore, it is not handled.
-    //   ==> USERS MUST NOT USE HERE A PHENOTYPE THAT IS NOT OF RANDOM FOREST CLASSIFIER TYPE.
+    //   ==> USERS MUST NOT USE HERE A PHENOTYPE THAT IS NOT OF DECISION TREE CLASSIFIER TYPE.
     try { 
         var workflow = await models.workflow.findOne({where:{name:req.params.workflowName}});
         var workflow_id = workflow.id;
@@ -492,7 +492,7 @@ router.get("/generate/:workflowName/:trainDatasetName/:testDatasetName", jwt({se
     // Upload folder path.
     uploads_folder_path = "uploads/" + workflow_id + "/python/"
     // Templates folder path.
-    templates_folder_path = "templates/RandomForestClassifier/"
+    templates_folder_path = "templates/DecisionTreeClassifier/"
     // Copy 'LICENSE.md' file from templates folder.
     try {
         await fs.copyFile(templates_folder_path + 'LICENSE.md', final_output_path + 'LICENSE.md')
@@ -558,16 +558,16 @@ router.get("/generate/:workflowName/:trainDatasetName/:testDatasetName", jwt({se
         return res.status(500).send(error);
     }
     try {
-        generator_url = config.get("generator.URL") + "/RandomForestClassifier/getStepCwl/1"
+        generator_url = config.get("generator.URL") + "/DecisionTreeClassifier/getStepCwl/1"
         step1_cwl_file_content = await got.get(generator_url).text();
         await fs.writeFile(final_output_path + 'cwl/step1.cwl', step1_cwl_file_content, "utf8");
-        generator_url = config.get("generator.URL") + "/RandomForestClassifier/getStepCwl/2"
+        generator_url = config.get("generator.URL") + "/DecisionTreeClassifier/getStepCwl/2"
         step2_cwl_file_content = await got.get(generator_url).text();
         await fs.writeFile(final_output_path + 'cwl/step2.cwl', step2_cwl_file_content, "utf8");
-        generator_url = config.get("generator.URL") + "/RandomForestClassifier/getStepCwl/3"
+        generator_url = config.get("generator.URL") + "/DecisionTreeClassifier/getStepCwl/3"
         step3_cwl_file_content = await got.get(generator_url).text();
         await fs.writeFile(final_output_path + 'cwl/step3.cwl', step3_cwl_file_content, "utf8");
-        generator_url = config.get("generator.URL") + "/RandomForestClassifier/getStepCwl/4"
+        generator_url = config.get("generator.URL") + "/DecisionTreeClassifier/getStepCwl/4"
     } catch(error) {
         error = "Error generating the cwl files corresponding to the steps (" + generator_url + "): " + error;
         logger.debug(error);
@@ -575,7 +575,7 @@ router.get("/generate/:workflowName/:trainDatasetName/:testDatasetName", jwt({se
     }
     // Call generator endpoint to generate main.cwl file.
     try {
-        generator_url = config.get("generator.URL") + "/RandomForestClassifier/getMainCwl"
+        generator_url = config.get("generator.URL") + "/DecisionTreeClassifier/getMainCwl"
         main_cwl_file_content = await got.get(generator_url).text();
         await fs.writeFile(final_output_path + 'main.cwl', main_cwl_file_content, "utf8");
     } catch(error) {
@@ -585,7 +585,7 @@ router.get("/generate/:workflowName/:trainDatasetName/:testDatasetName", jwt({se
     }
     // Call generator endpoint to generate main.yml file.
     try {
-        generator_url = config.get("generator.URL") + "/RandomForestClassifier/generateMainYml/" + req.params.trainDatasetName + "/" + req.params.testDatasetName
+        generator_url = config.get("generator.URL") + "/DecisionTreeClassifier/generateMainYml/" + req.params.trainDatasetName + "/" + req.params.testDatasetName
         main_yml_file_content = await got.get(generator_url).text();
         await fs.writeFile(final_output_path + 'main.yml', main_yml_file_content, "utf8");
     } catch(error) {

@@ -330,10 +330,10 @@ router.post('/uploadCsvDataset', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), 
     if ( (req.body.replace.toLowerCase() !== "true") && (req.body.replace.toLowerCase() !== "false") ) {
         return res.status(500).send("Error: replace parameter is not valid (see documentation).")
     }
-    // Check whether the Trace-based clustering phenotype exists.
+    // Check whether the Logistic Regression phenotype exists.
     // IMPORTANT: in this point, either no workflow of this type exists or only one exists.
-    // - Other workflows with the same name could exist, but they do not correspond to the Trace-based clustering technique (i.e., they were created using other endpoints).
-    //   ==> This case should not occur (USERS MUST NOT USE HERE A PHENOTYPE THAT IS NOT OF TRACE-BASED CLUSTERING TYPE) and, therefore, it is not handled.
+    // - Other workflows with the same name could exist, but they do not correspond to the Logistic Regression technique (i.e., they were created using other endpoints).
+    //   ==> This case should not occur (USERS MUST NOT USE HERE A PHENOTYPE THAT IS NOT OF LOGISTIC REGRESSION TYPE) and, therefore, it is not handled.
     try {
         var workflow = await models.workflow.findOne({where:{name:req.body.phenotypeName}});
         var workflow_id = workflow.id;
