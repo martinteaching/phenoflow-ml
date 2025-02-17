@@ -48,9 +48,11 @@
         
                     <p>Cite as: <code><a href="https://pubmed.ncbi.nlm.nih.gov/34457128">Phenoflow: A Microservice Architecture for Portable Workflow-based Phenotype Definitions (2021). Martin Chapman, Luke V Rasmussen, Jennifer A Pacheco, Vasa Curcin</a></code></p>
                     
-                    <p>However, a relevant limitation of the initial version of Phenoflow and other state-of-the-art tools for computable phenotype generation is the lack of support for phenotypes based on machine learning (i.e., ML-based phenotypes).</p>
+                    <p>Although this architecture offers great advantages over the rest of the tools from literature to documenting phenotype definitions and generating computable phenotypes, a relevant limitation of both the initial version of Phenoflow and these other state-of-the-art tools is the lack of support for phenotypes based on machine learning (i.e., ML-based phenotypes).</p>
 
-                    <p>To overcome this limitation, Phenoflow-ML adds powerful and novel capabilities for ML-based phenotyping to Phenoflow. Phenoflow-ML is formed of three components (web, generator and visualiser) and its general architecture is shown as follows:</p>
+                    <p>To overcome this limitation, Phenoflow-ML adds powerful and novel capabilities for ML-based phenotyping to Phenoflow. Phenoflow-ML is formed of three components: (1) web, which is in the middle of users, authors and the other components and offers different mechanisms to create, delete and modify phenotype definitions, (2) generator, which creates the specific files with the proper format for each phenotype definition (using a collection of templates previously stored in the system), and (3) visualiser, which depicts the phenotype definitions and their properties in a graphical way.</p>
+                    
+                    <p>According to the previous three components, the general architecture of Phenoflow-ML is shown as follows:</p>
 
                     <p><img src="./files/architecture.png" alt="Phenoflow-ML architecture" width="47%"></p>
 
