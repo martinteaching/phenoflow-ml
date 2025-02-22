@@ -1,6 +1,6 @@
 ## Prerequisites
 
-1. [Docker (machine)](https://docs.docker.com/engine/install/).
+1. [Docker](https://docs.docker.com/engine/install/).
 2. [Python 3](https://www.python.org/downloads/).
 3. [Pip](https://pip.pypa.io/en/stable/installation/).
 4. [Virtualenv](https://virtualenv.pypa.io/en/latest/installation.html).
