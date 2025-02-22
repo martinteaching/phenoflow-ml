@@ -1,9 +1,9 @@
 ## Prerequisites
 
-1. [Docker (machine)](https://docs.docker.com/machine/install-machine/).
-2. [Python 3](https://www.python.org/downloads/release/python-370/).
-3. [Pip](https://pip.pypa.io/en/stable/installing/).
-4. [Virtualenv](https://virtualenv.pypa.io/en/latest/installation/).
+1. [Docker (machine)](https://docs.docker.com/engine/install/).
+2. [Python 3](https://www.python.org/downloads/).
+3. [Pip](https://pip.pypa.io/en/stable/installation/).
+4. [Virtualenv](https://virtualenv.pypa.io/en/latest/installation.html).
 
 ## Configuration
 
