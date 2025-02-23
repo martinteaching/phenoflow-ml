@@ -51,7 +51,7 @@
 
             <h2>The endpoints of the generator component</h2>
 
-            <p>The generator component aims to create specific files in the proper format for each phenotype definition (for which an API with different endpoints is provided). For that, it uses the corresponding templates and makes the necessary substitutions according to the initial parameters given by the phenotype definition author.</p>
+            <p>The generator component aims to create specific files in the proper format for each phenotype definition (for which an API with different endpoints is provided). For that, it uses the corresponding templates and makes the necessary substitutions according to the initial parameters given by the author of the phenotype definition.</p>
 
             <p>This functionality is implemented in the <code>src/generator/api/routes.py</code> file and each type of ML-based phenotype has the following endpoints: <code>getStepCwl</code>, which generates the content of the CWL file of a certain step, <code>getMainCwl</code>, which generates the content of the <code>main.cwl</code> file, and <code>generateMainYml</code>, which generates the content of the <code>main.yml</code> file.</p>
 
@@ -59,7 +59,7 @@
             
             <h2>The endpoints of the web component</h2>
 
-            <p>The web component aims to offer different mechanisms (in the form of API endpoints) to create, delete and modify phenotype definitions. For that, it uses the endpoints of the generator API.</p>
+            <p>The web component aims to offer different mechanisms (in the form of API endpoints) to create, delete and modify phenotype definitions. For that, it uses the corresponding templates (making the necessary substitutions according to the initial parameters given by the author of the phenotype definition) and the endpoints of the generator API.</p>
 
             <p>This functionality is implemented in the <code>src/web/routes</code> folder, in which each type of ML-based phenotype has a single file with the following endpoints: <code>addPhenotype</code>, which creates a new ML-based phenotype definition based on the parameters specified by the creator, <code>uploadCsvDataset</code>, which allows to upload a dataset in CSV format, and <code>generate</code>, which returns a zip file containing all the needed files to execute the phenotype definition.</p>
 
