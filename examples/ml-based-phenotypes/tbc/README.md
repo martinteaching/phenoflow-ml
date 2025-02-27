@@ -1,13 +1,14 @@
 # About this document
 
-The purpose of this document is to show an example of the creation of an ML phenotype based on the Trace-based Clustering technique.
+The purpose of this document is to show an example of the creation of an ML phenotype definition based on the Trace-based Clustering phenotype type.
 
-In this case, the creation process is carried out by using the Phenoflow API and the Postman software, which is used to send HTTP requests to such API.
+In this case, the creation process is carried out by using the Phenoflow-ML API and the Postman software, which is used to send HTTP requests to such API.
 
 # Prerequisites
 
-Before starting with the creation of this type of phenotype, it is necessary to ensure that:
-  1. The Phenoflow infrastructure is properly deployed (either in our local machine or a remote server). For that, follow the steps from the README.md file of the root directory of this repository.
+Before starting with the creation of the ML-based phenotype definition, it is necessary to ensure that:
+
+  1. The Phenoflow-ML infrastructure is properly deployed (either in our local machine or a remote server). For that, follow the steps from the README.md file of the root directory of this repository.
   2. The Postman software is installed on our machine (see https://www.postman.com/).
 
 # Creation process
@@ -31,4 +32,3 @@ When the definition is created, the next step consists of uploading the dataset 
 The last step is to generate and download the CWL workflow. For that, the **generate** endpoint is used. This endpoint is of GET type and contains different parameters, that need to be added to the URL. When executing this endpoint, the templates of the Trace-based Clustering technique are customized with the properties stored in the system of the current Trace-based Clustering phenotype. An example is shown as follows:
 
 ![alt text](3.png "TraceBasedClustering")
-

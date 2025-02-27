@@ -16,7 +16,7 @@ const path = require('path');
 
 /**
  * @swagger
- * /phenoflow/SVC/addPhenotype:
+ * /phenoflowml/SVC/addPhenotype:
  *   post:
  *     security:
  *       - bearerAuth: []
@@ -292,7 +292,7 @@ router.post('/addPhenotype', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algo
 
 /**
  * @swagger
- * /phenoflow/SVC/uploadCsvDataset:
+ * /phenoflowml/SVC/uploadCsvDataset:
  *   post:
  *     security:
  *       - bearerAuth: []
@@ -395,7 +395,7 @@ router.post('/uploadCsvDataset', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), 
 
 /**
  * @swagger
- * /phenoflow/SVC/generate/{workflowName}/{trainDatasetName}/{testDatasetName}:
+ * /phenoflowml/SVC/generate/{workflowName}/{trainDatasetName}/{testDatasetName}:
  *   get:
  *     summary: Generate a Support Vector Classification phenotype
  *     description: Generate a phenotype based on the Support Vector Classification technique, indicanting and existing workflow/phenotype name and an existing train and test dataset names (including the extension)

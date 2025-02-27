@@ -11,10 +11,10 @@ const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerDefinition = {
   openapi: '3.0.1',
   info: {
-    title: 'Phenoflow API',
+    title: 'Phenoflow and Phenoflow-ML API',
     version: '1.0.0',
     description:
-      'Test the endpoints offered by Phenoflow.'
+      'Test the endpoints offered by Phenoflow and Phenoflow-ML.'
   },
   servers: [
     {
@@ -96,6 +96,7 @@ router.use("/SVC", SVC)
 router.use("/DecisionTreeClassifier", DecisionTreeClassifier)
 
 app.use("/phenoflow", router);
+app.use("/phenoflowml", router);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

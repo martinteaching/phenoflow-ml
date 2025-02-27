@@ -16,7 +16,7 @@ const path = require('path');
 
 /**
  * @swagger
- * /phenoflow/RandomForestClassifier/addPhenotype:
+ * /phenoflowml/RandomForestClassifier/addPhenotype:
  *   post:
  *     security:
  *       - bearerAuth: []
@@ -292,7 +292,7 @@ router.post('/addPhenotype', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algo
 
 /**
  * @swagger
- * /phenoflow/RandomForestClassifier/uploadCsvDataset:
+ * /phenoflowml/RandomForestClassifier/uploadCsvDataset:
  *   post:
  *     security:
  *       - bearerAuth: []
@@ -395,7 +395,7 @@ router.post('/uploadCsvDataset', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), 
 
 /**
  * @swagger
- * /phenoflow/RandomForestClassifier/generate/{workflowName}/{trainDatasetName}/{testDatasetName}:
+ * /phenoflowml/RandomForestClassifier/generate/{workflowName}/{trainDatasetName}/{testDatasetName}:
  *   get:
  *     summary: Generate a Random Forest Classifier phenotype
  *     description: Generate a phenotype based on the Random Forest Classifier technique, indicanting and existing workflow/phenotype name and an existing train and test dataset names (including the extension)

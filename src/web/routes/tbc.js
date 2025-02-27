@@ -16,7 +16,7 @@ const path = require('path');
 
 /**
  * @swagger
- * /phenoflow/tbc/addPhenotype:
+ * /phenoflowml/tbc/addPhenotype:
  *   post:
  *     security:
  *       - bearerAuth: []
@@ -446,7 +446,7 @@ const path = require('path');
 
 /**
  * @swagger
- * /phenoflow/tbc/uploadCsvDataset:
+ * /phenoflowml/tbc/uploadCsvDataset:
  *   post:
  *     security:
  *       - bearerAuth: []
@@ -549,7 +549,7 @@ const path = require('path');
 
 /**
  * @swagger
- * /phenoflow/tbc/generate2/{workflowName}/{datasetName}:
+ * /phenoflowml/tbc/generate2/{workflowName}/{datasetName}:
  *   get:
  *     summary: Generate a Trace-based clustering phenotype
  *     description: Generate a phenotype based on the Trace-based clustering technique, indicanting and existing workflow/phenotype name and an existing dataset name (including its extension)
@@ -739,7 +739,7 @@ router.get("/generate2/:workflowName/:datasetName", jwt({secret:config.get("jwt.
 
 /**
  * @swagger
- * /phenoflow/tbc/generate/{workflowName}/{datasetName}:
+ * /phenoflowml/tbc/generate/{workflowName}/{datasetName}:
  *   get:
  *     summary: Generate a Trace-based clustering phenotype
  *     description: Generate a phenotype based on the Trace-based clustering technique, indicanting and existing workflow/phenotype name and an existing dataset name (including its extension)

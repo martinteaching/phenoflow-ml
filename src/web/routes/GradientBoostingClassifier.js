@@ -16,7 +16,7 @@ const path = require('path');
 
 /**
  * @swagger
- * /phenoflow/GradientBoostingClassifier/addPhenotype:
+ * /phenoflowml/GradientBoostingClassifier/addPhenotype:
  *   post:
  *     security:
  *       - bearerAuth: []
@@ -292,7 +292,7 @@ router.post('/addPhenotype', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algo
 
 /**
  * @swagger
- * /phenoflow/GradientBoostingClassifier/uploadCsvDataset:
+ * /phenoflowml/GradientBoostingClassifier/uploadCsvDataset:
  *   post:
  *     security:
  *       - bearerAuth: []
@@ -395,7 +395,7 @@ router.post('/uploadCsvDataset', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), 
 
 /**
  * @swagger
- * /phenoflow/GradientBoostingClassifier/generate/{workflowName}/{trainDatasetName}/{testDatasetName}:
+ * /phenoflowml/GradientBoostingClassifier/generate/{workflowName}/{trainDatasetName}/{testDatasetName}:
  *   get:
  *     summary: Generate a Gradient Boosting Classifier phenotype
  *     description: Generate a phenotype based on the Gradient Boosting Classifier technique, indicanting and existing workflow/phenotype name and an existing train and test dataset names (including the extension)

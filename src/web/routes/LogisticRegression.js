@@ -16,7 +16,7 @@ const path = require('path');
 
 /**
  * @swagger
- * /phenoflow/LogisticRegression/addPhenotype:
+ * /phenoflowml/LogisticRegression/addPhenotype:
  *   post:
  *     security:
  *       - bearerAuth: []
@@ -292,7 +292,7 @@ router.post('/addPhenotype', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), algo
 
 /**
  * @swagger
- * /phenoflow/LogisticRegression/uploadCsvDataset:
+ * /phenoflowml/LogisticRegression/uploadCsvDataset:
  *   post:
  *     security:
  *       - bearerAuth: []
@@ -395,7 +395,7 @@ router.post('/uploadCsvDataset', jwt({secret:config.get("jwt.RSA_PRIVATE_KEY"), 
 
 /**
  * @swagger
- * /phenoflow/LogisticRegression/generate/{workflowName}/{trainDatasetName}/{testDatasetName}:
+ * /phenoflowml/LogisticRegression/generate/{workflowName}/{trainDatasetName}/{testDatasetName}:
  *   get:
  *     summary: Generate a Logistic Regression phenotype
  *     description: Generate a phenotype based on the Logistic Regression technique, indicanting and existing workflow/phenotype name and an existing train and test dataset names (including the extension)
