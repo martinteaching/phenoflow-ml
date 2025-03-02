@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Phenoflow-ML documentation</title>
+        <link rel="stylesheet" href="./files/bootstrap.min.css">
+        <link rel="stylesheet" href="./files/github.css">
+        <link rel="stylesheet" type="text/css" href="./files/main-20180518.css">
+    <script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="docs" src="./files/docs.js.descarga"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="jquery" src="./files/jquery.min.js.descarga"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="highlight" src="./files/highlight.pack.min.js.descarga"></script></head>
+    <body>
+
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a href="extending.html" class="button navbar-toggle">Extending Phenoflow-ML</a>
+                    <a href="ml-api.html" class="button navbar-toggle">API for ML-based phenotyping</a>
+                    <a href="wbp-api.html" class="button navbar-toggle">API for Workflow-based phenotyping</a>
+                    <a href="cwl-api.html" class="button navbar-toggle">Basic CWL API</a>
+                    <a href="about.html" class="button navbar-toggle">About</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="cwl-api.html">Basic CWL API</a></li>
+                        <li><a href="wbp-api.html">API for Workflow-based phenotyping</a></li>
+                        <li><a href="ml-api.html">API for ML-based phenotyping</a></li>
+                        <li><a href="extending.html">Extending Phenoflow-ML</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Content -->
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12" role="main" id="main">
+        
+                <section id="about">
+                    <h1>About</h1>
+                    
+                    <div style="position:relative;float:right;height:0;padding-bottom:40%;width:50%;margin-left:20px;">
+                        <iframe src="https://www.slideshare.net/slideshow/embed_code/key/3Oxb4KX77Waw1w?startSlide=1" width="597" height="376" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px;max-width: 100%;" allowfullscreen></iframe><div style="margin-bottom:5px"><strong><a href="https://www.slideshare.net/MartinChapman2/using-cwl-to-support-ehrbased-phenotyping" title="Using CWL to support EHR-based phenotyping" target="_blank">Using CWL to support EHR-based phenotyping</a></strong> from <strong><a href="https://www.slideshare.net/MartinChapman2" target="_blank">Martin Chapman</a></strong></div>
+                    </div>
+        
+                    <h2>Phenoflow and Phenoflow-ML</h2>
+        
+                    <p>Phenoflow is the name for a conceptual model and a microservice architecture, which includes this fork of CWL Viewer, that aim to enhance the reproducibility and portability of computable phenotypes.</p>
+        
+                    <p>Cite as: <code><a href="https://pubmed.ncbi.nlm.nih.gov/34457128">Phenoflow: A Microservice Architecture for Portable Workflow-based Phenotype Definitions (2021). Martin Chapman, Luke V Rasmussen, Jennifer A Pacheco, Vasa Curcin</a></code></p>
+                    
+                    <p>Although this architecture offers great advantages over the rest of the tools from literature to documenting phenotype definitions and generating computable phenotypes, a relevant limitation of both the initial version of Phenoflow and these other state-of-the-art tools is the lack of support for phenotypes based on machine learning (i.e., ML-based phenotypes).</p>
+
+                    <p>To overcome this limitation, Phenoflow-ML adds powerful and novel capabilities for ML-based phenotyping to Phenoflow. Phenoflow-ML is formed of three components: (1) web, which is in the middle of users, authors and the other components and offers different mechanisms to create, delete and modify phenotype definitions (using a collection of templates previously stored in the system and calling to the generator component), (2) generator, which creates the specific files with the proper format for each phenotype definition (using a collection of templates previously stored in the system), and (3) visualiser, which depicts the phenotype definitions and their properties in a graphical way.</p>
+                    
+                    <p>According to the previous three components, the general architecture of Phenoflow-ML is shown as follows:</p>
+
+                    <p><img src="./files/architecture.png" alt="Phenoflow-ML architecture" width="47%"></p>
+
+                    <p>Phenoflow-ML includes many types of ML-based phenotypes (e.g., Trace-based Clustering, Logistic Regression, Random Forest, etc.) and, since this infraestructure is easily extensible, users can add new extensions and functionalities (see <a href="extending.html">Extending Phenoflow-ML</a>). From these types of ML-based phenotypes, specific ML-based phenotype definitions (with specific initial parameters) can be created (see <a href="ml-api.html">API for ML-based phenotyping</a>).</p>
+
+                    <h2>CWL Viewer</h2>
+        
+                    <div style="position:relative;float:right;height:0;padding-bottom:30%;width:50%;margin-left:20px;">
+                        <iframe src="https://www.youtube-nocookie.com/embed/_yjhVTmvxLU?rel=0?ecver=2" style="position:absolute;width:100%;height:100%;left:0" allowfullscreen="true"></iframe>
+                    </div>
+        
+                    <p>CWL Viewer is a richly featured web visualisation suite for workflows written in the
+                        <a href="https://www.commonwl.org/">Common Workflow Language</a> with an aim of facilitating sharing,
+                        understanding and discovery as well as encouraging best practices when writing workflows and their
+                        tooling.</p>
+        
+                    <p>Cite as: <code><a href="https://doi.org/10.7490/f1000research.1114375.1">https://doi.org/10.7490/f1000research.1114375.1</a></code></p>
+                    <p>Technical Report: <a href="https://doi.org/10.5281/zenodo.823295">https://doi.org/10.5281/zenodo.823295</a></p>
+        
+                    <p>CWL Viewer also won the <a href="https://f1000research.com/">F1000Research</a> Best Poster 
+                        <a href="https://bioexcel.eu/poster-award-for-cwlviewer/">Award</a> at
+                        <a href="https://www.iscb.org/ismbeccb2017">ISMB/ECCB 2017</a> for its
+                        <a href="https://doi.org/10.7490/f1000research.1114375.1">poster submission.</a></p>
+        
+                    <p>This project was developed at the <a href="https://www.esciencelab.org.uk/">eScience Lab</a> at
+                    <a href="https://www.manchester.ac.uk/">The University of Manchester</a>, with work supported by
+                    <a href="https://bioexcel.eu/">Bioexcel</a>, funded by the European Union Horizon 2020 program under
+                    <a href="https://cordis.europa.eu/projects/675728">grant agreement 675728.</a></p>
+        
+                    <p>Contributions are welcome in the form of <em>issues</em> and 
+                        <em>pull requests</em> to the
+                        <a href="https://github.com/common-workflow-language/cwlviewer">Github repository</a>.</p>
+                </section>
+                    
+        
+                <section id="privacy"> 
+                    <h1>Privacy policy</h1>
+                    <p>CWL Viewer publishes visualizations of workflows from publicly available 
+                    <em>git</em> repositories hosted by third-parties like <a href="https://github.com/">github.com</a>
+                    or <a href="https://about.gitlab.com/">gitlab.com</a>.             
+                    Anyone can submit a workflow, which will be added 
+                    to our <a href="https://kclhi.org/phenoflow/workflows">public listing</a>.                         
+                    </p>
+                    
+                    <section id="track-use">            
+                    <h2>Tracking usage</h2>
+                    <p>
+                    We do not track individual users of CWL Viewer, but we do record 
+                    general usage (e.g. web server access log) 
+                    for operational purposes and to prevent abuse.            
+                    We may use HTTP session cookies in order to assist 
+                    workflow submission, but do not use cookies to identify users.
+                    </p>
+                    </section>
+                    <section id="what-info">            
+                    <h2>What information is held?</h2>
+                    <p>
+                    We hold information about public open source workflows in order 
+                    to visualize them graphically and textually, as well as making their 
+                    declared metadata accessible to the public in different formats such as linked data.
+                    This information may be held until explicitly requested for removal, however
+                    we reserve the right to remove any workflow from listing without prior notice.
+                    </p>
+                    <p>
+                    Metadata shown from the public workflows may include personal data, 
+                    including authorship or as part of workflow descriptions. 
+                    We retrieve this information from the submitted git repository.       
+                    Downloading a workflow or its metadata may include 
+                    information from the git repository not otherwise
+                    shown in the CWL Viewer interface, e.g. authors from git commit history. 
+                    </p>
+                    <p>
+                    For performance reasons the CWL Viewer may keep a copy of the 
+                    checked out git repository and the derived metadata. 
+                    We may at a later date retrieve published changes 
+                    from the original repository to update the information held.            
+                    </p>
+                    </section>
+                    <section id="where-to">
+                    <h2>Where is information exposed?</h2>
+                    <p>
+                    Workflows and their metadata can be accessed in CWL Viewer through
+                    the <a href="https://kclhi.org/phenoflow/workflows">public listing</a> by browsers, 
+                    programmaticaly through the <a href="cwl-api.html">API</a>, and 
+                    can be downloaded in multiple formats like ZIP, SVG or RDF.           
+                    </p>
+                    <p>            
+                    CWL Viewer generates and exposes <a href="https://w3id.org/cwl/view/">permalinks</a>
+                    which reference the git <em>commit</em> and the workflow <em>path</em> 
+                    within the git repository, but not the git repository location or username.             
+                    These permalinks are only resolvable with
+                    the public <a href="https://view.commonwl.org/">https://view.commonwl.org/</a> 
+                    if it has previously visualized a corresponding public git repository.
+                    </p>
+                    <p>
+                    Metadata from public workflows may be published to the 
+                    <a href="https://www.openaire.eu/">OpenAIRE</a> registry, 
+                    including author names and workflow title. 
+                    </p>
+                    </section>
+                </section>                
+        
+        
+                <section id="best-practice">
+                    <h1>Best Practices</h1>
+                    <p>In order to ensure that your workflow is well presented in CWL Viewer, we recommend the following of
+                    <a href="http://www.commonwl.org/user_guide/rec-practices/">CWL Best Practices</a>. Those which are
+                        specifically relevant to the viewer are detailed below, but it is suggested that you try to meet as
+                        many as possible to include the general quality and reproducibility of your workflows.</p>
+                    <p>Some limitations of the CWL Viewer which you may need to be aware of are also described here.</p>
+        
+                    <section id="label">
+                    <h2>Label Strings</h2>
+                    <p class="recommendation">Include a top level short <code>label</code> summarising each tool and workflow</p>
+                    <p class="why">Labels give the user an easy human-readable version of the name for the tool or workflow</p>
+                    <p class="use">For workflows this will be displayed at the top of the page as the title and for tools it will be
+                        displayed in the table and as the name of the step in the visualisation. If a <code>label</code>
+                        is given at the step level, it will take priority over the top level tool <code>label</code>. You can
+                        use this to provide a more descriptive label of the tool's application in the particular step if
+                        preferred.</p>
+                    </section>                
+        
+                    <section id="conceptual">
+                    <h2 id="doc">Doc Strings</h2>
+                    <p class="recommendation">If useful, include a top level <code>doc</code> string providing a longer, more detailed description
+                        than was provided in the <code>label</code> (see above)</p>
+                    <p class="why">Docs give the user a detailed description of the role a tool or workflow performs</p>
+                    <p class="use">For workflows this will be displayed at the top of the page under the title and for tools it will be
+                        displayed in the table. If a <code>doc</code> string is given at the step level, it will take priority
+                        over the top level tool doc. You can use this to provide a more descriptive label of the tool's
+                        application in the particular step if preferred</p>
+                    </section>
+        
+                    <section id="conceptual">
+                    <h2>Conceptual Identifiers</h2>
+                    <p class="recommendation">All <code>input</code> and <code>output</code> identifiers should reflect their conceptual identity.
+                       Generic and uninformative names such as <code>result</code> or <code>input</code>/<code>output</code>
+                       should be avoided</p>
+                    <p class="why">Helpful identifiers allow for the links between steps in the CWL file to be easily distinguished</p>
+                    <p class="use">Identifiers are displayed in the tables and are unique to the step. The <code>label</code> is also
+                    used as a replacement for the identifier in the visualisation if provided.</p>
+                    </section>
+        
+                    <section id="format">
+                    <h2>Format Specification</h2>
+                    <p class="recommendation">The <code>format</code> field should be specified for all input and output <code>File</code>s</p>
+                    <p class="recommendation_more">
+                        Tools should use format identifiers from a relevant ontology such as the
+                        <a href="http://edamontology.org/format_1915">EDAM Ontology</a> in the case of Bioinformatics tools.
+                        For plain types use the
+                        <a href="http://www.iana.org/assignments/media-types/media-types.xhtml">IANA media type list</a> with
+                        <code>$namespaces: { iana: "https://www.iana.org/assignments/media-types/" }</code>, for example
+                        <code>iana:text/plain</code>, <code>iana:text/tab-separated-values</code>
+                    </p>
+                    <p class="why">The use of formal standards for format fields enables implementations to provide checks
+                    for compatibility in formatting of files</p>
+                    <p class="use">Ontologies will be parsed and the name of and link to the format displayed in the table on workflow
+                        pages. Plain formats will have the iana.org link given but will not display the name of the format.</p>
+                    </section>
+        
+                    <section id="separation-of-concerns"> 
+                    <h2>Separation of Concerns</h2>
+                    <p class="recommendation">Each <code>CommandLineTool</code> description should focus on a single operation only, even if the
+                        (sub)command is capable of more.</p>
+                    <p class="why">This allows for easier reuse of the tool in other workflows and understanding as to it's purpose</p>
+                    <p class="use">In CWL Viewer this ensures that steps are clear in purpose within the workflow and generated visualisation</p>
+        
+                    <h2 id="javascript">JavaScript Elimination</h2>
+                    <p class="recommendation">Evaluate all use of JavaScript for possible elimination or replacement. For instance, for the
+                        manipulation of <code>File</code> names and paths, often one of the built in <code>File</code>
+                        properties such as <code>basename</code>, <code>nameroot</code>, <code>nameext</code> etc
+                        could be used instead</p>
+                    <p class="why">Tool runners can implement more efficient implementations of built in functionality, which
+                        makes JavaScript expressions a last resort</p>
+                    <p class="use">CWL viewer does not take into account JavaScript expressions when extracting information about your
+                        workflows</p>
+                    </section>
+        
+                    <section id="subworkflows">
+                    <h2>Use of Subworkflows</h2>
+                    <p class="recommendation">CWL implementations which also implement <code>SubworkflowFeatureRequirement</code> can support nesting
+                    workflows as a step within others. Complex workflows with individual components which can be abstracted
+                    should utilise this to make their workflow modular and allow sections of them to be easily reused</p>
+                    <p class="why">Extracting subworkflows enables them to be run, developed on and tested individually. It also makes
+                        them able to be understood more easily</p>
+                    <p class="use">Subworkflows are simplified in the visualisations and are linked as a different workflow in the
+                    <code>Step</code> tables on each workflow page</p>
+                    </section>
+        
+                    <section id="attribution">
+                    <h2>Attribution</h2>
+                    <p class="recommendation">Include attribution information in your workflow and tool descriptions</p>
+                    <p class="recommendation_more">
+                        For example, to attribute a person as the author of a workflow or tool with name, email and
+                        ORCID information, include the following statements at the top level:<br />
+        <pre>
+        $namespaces: { s: "http://schema.org/" }
+        s:author:
+        - class: s:Person
+          s:name: Mark Robinson
+          s:email: mailto:mark@example.com
+          s:id: http://orcid.org/0000-0002-8184-7507
+        </pre>
+                        For attributing organisations, see <a href="https://github.com/Barski-lab/ga4gh_challenge/blob/9de2f0c29ae09e31a434d6c5c969a5e3b2dbf535/biowardrobe_chipseq_se.cwl#L387">this workflow</a>
+                        as an example
+                    </p>
+                    <p class="why">Attribution information allows your workflows and tooling to be used by others while
+                    recognising your contributions. The inclusion of an <a href="https://orcid.org/">ORCID</a> allows you to
+                    be uniquely identified from other researchers</p>
+                    <p class="use">CWLViewer parses attribution information for inclusion in the Research Object Manifest from
+                    both the Git commit logs and from the CWL descriptions themselves when expressed in the
+                    <a href="http://schema.org/author">http://schema.org/author</a> format as above</p>
+                    </section>
+        
+                    <section  id="licensing">
+                    <h2>Licensing</h2>
+                    <p class="recommendation">Include a <a href="https://opensource.org/licenses">OSI approved open source license</a>
+                    in your workflow and tool descriptions</p>
+                    <p class="recommendation_more">
+                        For example, the following two statements at the top level of a workflow or tool description licenses it
+                        under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache V2.0 License</a>:<br />
+        <pre>
+        $namespaces: { s: "http://schema.org/" }
+        s:license: "https://www.apache.org/licenses/LICENSE-2.0"
+        </pre>
+                    </p>
+                    
+                    <p class="why">A permissive open source license allows others to remix and use your tooling and workflows
+                    to prevent the community from repeating development effort, allowing everyone to benefit</p>
+                    <p class="use">CWL Viewer is designed to allow people to locate and make use of the workflows developed by
+                    others as well as to share and demonstrate work, and open source licenses promote this goal</p>
+                    </section>
+                </section>
+        
+                    
+                <section id="limitations"> 
+                    <h1>Limitations</h1>
+                    <h2>Research Objects</h2>
+                    <p>Research Objects are constructed from the containing directory of the workflow file. This means tooling
+                        external to the directory but used by the workflow will not be included
+                        (<a href="https://github.com/common-workflow-language/cwlviewer/issues/103">see Github issue</a>)</p>
+                    <p>We recommend that you keep all files in the containing folder for current use of CWL Viewer</p>
+        
+                    <h2 id="ssh">SSH Cloning</h2>
+                    <p>SSH URLs are not able to be cloned or used as submodules due to the need for SSH keys to be set up.</p>
+                    <p>We do not plan SSH support due to the impact on reproducibility from this being made a required
+                    step to download the workflow.</p>
+        
+                    <h2 id="others">Others</h2>
+                    <p>Other limitations or unimplemented features can be viewed
+                        <a href="https://github.com/common-workflow-language/cwlviewer">on the Github issues page</a></p>
+                </section>                
+                </div>
+            </div>
+        </div>
+        <!-- Content -->
+
+        <div id="footer" class="container">
+        <div class="row">
+            <hr>
+            <div class="col-lg-12 muted text-center">
+                © 2020-2025 <a href="https://kclhi.org/" rel="noopener" target="_blank">kclhi</a>
+                and <a href="https://martinchapman.co.uk/teaching#students" rel="noopener" target="_blank">contributors</a>. View <a href="https://web.archive.org/web/20230330102337/https://kclhi.org/phenoflow/">original library</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 muted text-center">
+                <a href="https://github.com/common-workflow-language/cwlviewer" rel="noopener" target="_blank">CWL Viewer</a>
+                © 2016-2022 <a href="https://www.commonwl.org/" rel="noopener" target="_blank">Common Workflow Language Project</a>
+                and <a href="https://github.com/orgs/common-workflow-language/people" rel="noopener" target="_blank">contributors</a>.
+                Distributed under <a href="https://www.apache.org/licenses/LICENSE-2.0" rel="noopener" target="_blank">Apache License, version 2.0</a>
+                (required <a href="https://github.com/common-workflow-language/cwlviewer/blob/master/NOTICE.md" rel="noopener" target="_blank">attribution notices</a>).                
+               	<br>
+                
+                (<a href="about.html#privacy">Privacy policy</a>)
+            </div>
+        </div>
+        <div class="row logos">
+          <div class="col-lg-12 muted text-center">
+            <a href="https://kcl.ac.uk/" rel="noopener" target="_blank"><img src="./files/kcl.png" alt="King&#39;s College London"></a>
+            <a href="https://kclhi.org/" rel="noopener" target="_blank"><img src="./files/kclhi.png" alt="King&#39;s College London Health Informatics"></a>
+            <a href="https://www.hdruk.ac.uk/" rel="noopener" target="_blank"><img src="./files/hdruk.png" alt="Health Data Research UK"></a>
+          </div>
+        </div>
+        <div class="row logos">
+          <div class="col-lg-12 muted text-center">
+            <a href="https://www.commonwl.org/" rel="noopener" target="_blank"><img src="./files/CWL-Logo-nofonts.svg" alt="Common Workflow Language"></a>
+            <a href="https://www.esciencelab.org.uk/" rel="noopener" target="_blank"><img src="./files/manchester.svg" alt="The University of Manchester" title="eScienceLab, School of Computer Science, The University of Manchester"></a>
+            <a href="https://bioexcel.eu/" rel="noopener" target="_blank"><img src="./files/BioExcel_logo_cropped.svg" alt="BioExcel" title="BioExcel Center of Excellence for Computational Biomolecular Research"></a>
+            <a href="https://cordis.europa.eu/projects/675728" rel="noopener" target="_blank"><img src="./files/Flag_of_Europe.svg" alt="EU" title="European Commision grant 675728"></a>
+            <a href="https://hpc4ai.unito.it/" rel="noopener" target="_blank"><img src="./files/hpc4ai-logo.webp" alt="HPC4AI" title="HPC4AI competence centre, University of Turin"></a>
+          </div>
+        </div>
+    </div>
+
+        <script src="./files/require.js.descarga"></script>
+    
+
+</body></html>
