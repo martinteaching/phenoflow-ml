@@ -55,8 +55,8 @@ test_dataset.to_csv("mushroom-test.csv", index = False)
 
 The following images show the attributes from the dataset and some instances before and after the transformation:
 
-![Before the transformation](1.png "Before the transformation")
-![After the transformation](2.png "After the transformation")
+![Before the transformation](1.PNG "Before the transformation")
+![After the transformation](2.PNG "After the transformation")
 
 # Creation of the ML-based phenotype definition
 
